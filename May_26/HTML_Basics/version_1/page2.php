@@ -10,6 +10,13 @@ echo "<html>";
 
     echo "<img src='lemonjuice.jpg'>";
 
+    echo "<ol>";
+        echo "<li> Item: Knowledge </li>";
+        echo "<li> Item: Delight </li>";
+        echo "<li> Item: Flight </li>";
+    echo "</ol>";
+
+echo "<a href='page3.php'> Go to page 3</a>";
 
 echo "</html>";
 ?>

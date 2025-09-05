@@ -5,7 +5,10 @@ echo "<!DOCTYPE html>";
 echo "<html>"; # Opening for HTML.
 
 
-    echo "<head><title>Abdallah Occupational Specialism</title></head>"; # The head tag is above the body tag. This is my title for index.
+    echo "<head><title>Abdallah Occupational Specialism</title>
+
+
+    </head>"; # The head tag is above the body tag. This is my title for index.
 
     echo "</head>"; # Closing the head.
 
@@ -38,10 +41,18 @@ echo "<html>"; # Opening for HTML.
         echo "<tr>";
             echo "<td>Hello</td>";
             echo "<td>Hi3</td>";
+            echo "<td>Hi4</td>";
 
         echo "</tr>";
 
     echo "</table>";
+
+    echo "<ul>";
+        echo "<li> Item: Orange </li>";
+        echo "<li> Item: Strawberry </li>";
+        echo "<li> Item: Banana </li>";
+    echo "</ul>";
+
 
     echo "</body>";
 
