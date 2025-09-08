@@ -13,14 +13,32 @@ echo "<html>"; # Opening for HTML.
 
 
     echo "<body>";
-    echo "<form method='post' action=''>";
-    echo "<label for='num'>Number of Tickets</label>";
-    echo "<label for='password'>The Password</label>";
-    echo "<input type='text' name='num' id='num' placeholder='number of tickets' required>";
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    echo "Your name: " . $_POST['name'];
+     echo "<br>";
+     echo "Your email: " . $_POST['email'];
+     echo "<br>";
+     echo "Your password: " . $_POST['pwd'];
+     echo "<br>";
+     echo "Your password confirmed: " . $_POST['pwd2'];
+}
+
+    echo "<form method='post' action=''>";  # If there is no action, it will just reload this page.
+
+    echo "<label for='name'>Name</label>";
+    echo "<input type='text' name='name' id='name' placeholder='Enter your name.' required>";
     echo "<br>";
-    echo "<input type='password' name='password' id='password' placeholder='password' required>";
-    echo "<hr>";
-    echo "<input type='submit' name='submit' value='Send'>";
+    echo "<label for='email'>Email</label>";
+    echo "<input type='text' name='email' id='email' placeholder='Enter your email.' required>";
+echo "<br>";
+    echo "<input type='password' name='pwd' id='password'>";
+    echo "<label for='password'>Password</label>";
+    echo "<br>";
+echo "<input type='password' name='pwd2' id='password2'>";
+echo "<label for='submit'>Password Confirm</label>";
+
+echo "<input type='submit' value='Submit'>";
 
     echo "</form>";
 

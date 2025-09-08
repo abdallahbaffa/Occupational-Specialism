@@ -37,7 +37,7 @@ echo "<html>"; # Opening for HTML.
 
     echo "<u>Nooo, it seems that there is one more tag 😒</u>"; # This is the underline tag. It underlines.
 
-    echo "<a href='page2.php'> Go to page 2</a>";
+    echo "<a href='page2.php'> Go to page 2</a>";  #
 
     echo "<img src='images/vinci_library.png'>";
 
