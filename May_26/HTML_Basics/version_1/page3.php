@@ -5,7 +5,7 @@ echo "<html>";
 echo "<head><title>Page 3: Moon Mountain</title>";
 echo "</head>";
 
-echo "<img src='mt_moon.png'>";
+echo "<img src='images/mt_moon.png'>";
 
 
     echo "<ul>";

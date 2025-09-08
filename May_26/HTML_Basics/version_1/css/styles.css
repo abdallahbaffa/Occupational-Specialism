@@ -1,0 +1,28 @@
+body {
+    color: #5a9987;
+    font-family: Maiandra GD, Reem Kufi, sans-serif; /*Telling the website what font to use! The first two are defaults, and the last is a fall back, it will take the first two and find one that has a similar style to the first two fonts. */
+    background-color: #494141;
+}
+
+p {
+    color: bisque;
+}
+
+    #today {
+        color: chartreuse;
+    }
+
+    #cloud {
+        color: dodgerblue;
+        border-left: crimson;
+        border-style: outset;
+    }
+
+    #name {
+        color: #ffffb4;
+        border-style: outset;
+        border-left: #b4ffb4;
+        border-top: #b4b4ff;
+        border-bottom: #ffb4b4;
+        border-right: #fb4fb4;
+    }

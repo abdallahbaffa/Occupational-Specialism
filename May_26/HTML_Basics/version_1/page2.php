@@ -8,7 +8,7 @@ echo "<html>";
     echo "<title>Page 2: Lemon Juice</title>";
     echo "</head>";
 
-    echo "<img src='lemonjuice.jpg'>";
+    echo "<img src='images/lemonjuice.jpg'>";
 
     echo "<ol>";
         echo "<li> Item: Knowledge </li>";

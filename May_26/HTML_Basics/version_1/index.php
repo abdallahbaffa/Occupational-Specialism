@@ -5,10 +5,11 @@ echo "<!DOCTYPE html>";
 echo "<html>"; # Opening for HTML.
 
 
-    echo "<head><title>Abdallah Occupational Specialism</title>
 
 
-    </head>"; # The head tag is above the body tag. This is my title for index.
+    echo "<head><title>Abdallah Occupational Specialism</title>";
+
+    echo "<link rel='stylesheet' href='css/styles.css'></head>"; # The head tag is above the body tag. This is my title for index.
 
     echo "</head>"; # Closing the head.
 
@@ -16,7 +17,11 @@ echo "<html>"; # Opening for HTML.
 
     echo "<h1>Hi.</h1>"; # This is a heading, it says Hello.
 
-    echo "<p>So, they say every cloud has a silver lining.</p>"; # This is the paragraph tag. It makes paragraphs.
+    echo "<p id='cloud'>So, they say every cloud has a silver lining.</p>"; # This is the paragraph tag. It makes paragraphs.
+
+    echo "<p id='today'>This is today:</p>";
+
+    echo "<p id='name'>My name is:</p>";
 
     echo "<hr>Clouds are high in the air.</hr>"; # This is the horizontal rule tag. Ruler.
 
@@ -34,7 +39,7 @@ echo "<html>"; # Opening for HTML.
 
     echo "<a href='page2.php'> Go to page 2</a>";
 
-    echo "<img src='vinci_library.png'>";
+    echo "<img src='images/vinci_library.png'>";
 
     echo "<table>";
 
