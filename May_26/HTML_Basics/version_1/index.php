@@ -5,8 +5,6 @@ echo "<!DOCTYPE html>";
 echo "<html>"; # Opening for HTML.
 
 
-
-
     echo "<head><title>Abdallah Occupational Specialism</title>";
 
     echo "<link rel='stylesheet' href='css/styles.css'></head>"; # The head tag is above the body tag. This is my title for index.
