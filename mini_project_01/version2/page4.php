@@ -35,7 +35,7 @@ echo "<p>Here's my attempt at a Lotus.</p>";
 // This section contains the drawing image
 echo "<div class='drawing-container'>";
 // This is the image of the drawing, with a class for styling
-echo "<img src='images/mylotus.jpg' alt='My vibrant color drawing' class='drawing-image'>";
+echo "<img src='images/my_lotus.jpg' alt='My vibrant color drawing' class='drawing-image'>";
 echo "</div>";
 
 // This section contains a description of the drawing
