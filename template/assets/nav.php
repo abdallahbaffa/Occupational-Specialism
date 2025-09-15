@@ -1,4 +1,4 @@
-<?php
+<?php /*This file is for the navigation bar*/
 echo "<div class='navi'>";
 echo "<nav>";
 

@@ -14,6 +14,10 @@ nav ul {
     background-color: #6e79c0; /*Background color.*/
 }
 
-nav li:hover { /*Gonna fix this one real soon*/
+nav li { /*creates spacing around li items in navbar*/
+    padding: 5px 20px 5px 20px ; /*top right bottom left*/
+}
+
+nav li:hover { /*Gives color to hovered lists.*/
     background-color: #b77e55;
 }

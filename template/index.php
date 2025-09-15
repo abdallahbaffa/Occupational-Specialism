@@ -1,12 +1,13 @@
 <?php
 
 echo "<!DOCTYPE html>";
-
+// Start of the HTML document
 echo "<html>";
 
 echo "<head>";
 
 echo "<title>Template</title>";
+// Links to the external CSS file, 'styles.css', which handles the website's design
 echo "<link rel='stylesheet' href='css/styles.css'>";
 
 echo "</head>";
