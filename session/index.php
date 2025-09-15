@@ -1,12 +1,19 @@
 <?php
+
 session_start();
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+
+}
+
 echo "<!DOCTYPE html>";
 // Start of the HTML document
 echo "<html>";
 
 echo "<head>";
 
-echo "<title>Template</title>";
+echo "<title>Session Work</title>";
 // Links to the external CSS file, 'styles.css', which handles the website's design
 echo "<link rel='stylesheet' href='css/styles.css'>";
 
@@ -22,7 +29,15 @@ require_once "assets/topbar.php";
 
 echo "<div id='content'>";
 
-# content goes here
+echo "<h2>Session Work</h2>";
+
+# To take user input, store it in session and output it elsewhere.
+
+echo "<form method='post' action=''>"; /*If not declaration of action, then it will reload the page*/
+
+echo "<input type='text' name='message' id='message' placeholder='Enter your message.' required>";
+
+echo "<input type='submit' value='Submit'>";
 
 echo "</div>";
 

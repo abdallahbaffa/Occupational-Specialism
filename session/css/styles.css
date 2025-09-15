@@ -1,0 +1,28 @@
+body {
+    background-color: #734c44;
+}
+
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+nav ul {
+    list-style-type: none; /* removes bullet points from my list */
+    margin: 0; /* removes any default margin */
+    padding: 0; /* removes any default padding */
+    display: flex; /*Makes the content list horizontal, and stop vertical.*/
+    justify-content: flex-start; /*STOP VERTICAL. Justify.*/
+    background-color: #6e79c0; /*Background color.*/
+}
+
+nav li { /*creates spacing around li items in navbar*/
+    padding: 5px 20px 5px 20px ; /*top right bottom left*/
+}
+
+nav li:hover { /*Gives color to hovered lists.*/
+    background-color: #b77e55;
+}
