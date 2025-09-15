@@ -26,7 +26,7 @@ echo "<p><b><u>GibJohn Tutoring</u></b></p>";
 echo "<div class='content'>";
 echo "<br>";
 
-echo "<img src=solution/images/index_pic.jpg>";  # image added to improve the appearance of the index page.
+echo "<img src=solution/images/index_pic.jpg>";  # image added to improve the appearance of the index page (sadly not in the design).
 
 echo "<footer>";
 echo "<p>Contact Information:</p>";
