@@ -8,15 +8,15 @@ function usr_msg()
             $msg = "<div id='error'> USER MESSAGE: " . $_SESSION["msg"] . "</div>";
 
         } else {
-    $msg = "<div id='umsg'> USER MESSAGE: " . $_SESSION["msg"] . "</div>";
+            $msg = "<div id='umsg'> USER MESSAGE: " . $_SESSION["msg"] . "</div>";
         }
 
         $_SESSION['msg'] = "";
         unset($_SESSION["msg"]);
         return $msg;
-}
+    }
     else {
         return"";
-}
+    }
 
 }

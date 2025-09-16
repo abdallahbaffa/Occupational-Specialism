@@ -26,3 +26,7 @@ nav li { /*creates spacing around li items in navbar*/
 nav li:hover { /*Gives color to hovered lists.*/
     background-color: #b77e55;
 }
+
+#error {
+    color: #ff0000;
+}
