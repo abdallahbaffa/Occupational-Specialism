@@ -2,9 +2,11 @@
 
 session_start();
 
+require_once "assets/common.php";
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-
+    $_SESSION["msg"] = $_POST["message"];
 }
 
 echo "<!DOCTYPE html>";
@@ -29,13 +31,15 @@ require_once "assets/topbar.php";
 
 echo "<div id='content'>";
 
+echo usr_msg();
+
 echo "<h2>Session Work</h2>";
 
 # To take user input, store it in session and output it elsewhere.
 
 echo "<form method='post' action=''>"; /*If not declaration of action, then it will reload the page*/
 
-echo "<input type='text' name='message' id='message' placeholder='Enter your message.' required>";
+echo "<input type='text' name='message' placeholder='Message?' required>";
 
 echo "<input type='submit' value='Submit'>";
 
