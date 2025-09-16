@@ -14,8 +14,7 @@ function usr_msg()
         $_SESSION['msg'] = "";
         unset($_SESSION["msg"]);
         return $msg;
-}
-    else {
+} else {
         return"";
 }
 
