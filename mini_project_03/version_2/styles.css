@@ -1,5 +1,5 @@
 body {
-    background-color: #434343;
+    background-color: #ad8064;
 }
 
 h2 {
@@ -31,21 +31,26 @@ nav li:hover { /*Gives color to hovered lists.*/
 }
 
 .logo {
-    width: 50px;
-    height: auto;
+    position: fixed;
+    top: 3px;
+    left: 10px;
+    width: 50px; /* Adjust this to change the size of your icon */
+    height: auto; /* This keeps the image from looking stretched */
+    z-index: 1001;
 }
 
 .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    background-color: #434343;
-    padding: 10px 0;
-    text-align: center;
-}
-
-h1 {
-    color: white;
-    display: inline-block; /* Makes sure the title sits nicely next to the logo */
-    vertical-align: middle;
+    background-color: #6e79c0; /* Match the nav background color */
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .topbar a {
@@ -58,31 +63,4 @@ h1 {
 
 .topbar a:hover {
     color: #b77e55;
-}
-
-.navi {
-    display: flex;
-    justify-content: center; /* This will center your links horizontally */
-    background-color: #636363;
-    padding: 10px 0;
-}
-
-#h3headings {
-    color: #D36161;
-}
-
-#ptext {
-    color: #D0BEBF;
-}
-
-#p2text {
-    color: #DEA16C;
-}
-
-#passcheck {
-    color: #6CC4C0;
-}
-
-#remember {
-    color: #EDA965;
 }
