@@ -28,8 +28,6 @@ require_once "assets/nav.php";
 
 echo "<div class='container'>";
 
-
-
 echo "<div id='content'>";
 
 # content goes here
