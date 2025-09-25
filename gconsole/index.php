@@ -2,7 +2,7 @@
 
 session_start();
 
-require_once "assets/common.php";
+require_once "assets/db-con.php";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
@@ -31,7 +31,12 @@ require_once "assets/nav.php";
 
 echo "<div id='content'>";
 
-# content goes here
+try {
+    $conn = dbconnect_insert();
+        echo"success";
+} catch (PDOException $e) {
+    echo $e->getMessage();
+}
 
 echo "<img src='images/image-index.png'>"; # Index image picture.
 
