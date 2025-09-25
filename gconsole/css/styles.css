@@ -30,11 +30,6 @@ nav li:hover { /*Gives color to hovered lists.*/
     background-color: #b77e55;
 }
 
-.logo {
-    width: 50px;
-    height: auto;
-}
-
 .topbar {
     width: 100%;
     background-color: #434343;
