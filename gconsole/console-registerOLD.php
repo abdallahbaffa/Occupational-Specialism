@@ -2,13 +2,25 @@
 
 session_start();
 
+require_once("assets/db-con.php");
+require_once("assets/common.php");
+
+if ($_SERVER["REQUEST_METHOD"] === "POST"){
+    try{
+        new_console(dbconnect_insert(), $_POST); /*Calling subroutine and one of the paramerters is calling another subroutine, and if the conncetion is succefful we return the conncetion to the database.*/
+        $_SESSION['usermessage'] = "SUCCESS: Console Created!";
+    } catch(PDOException $e){
+        $_SESSION['usermessage'] = $e->getMessage();
+    }
+}
+
 require_once "assets/common.php";
 
 echo "<!DOCTYPE html>";
 echo "<html>";
 echo "<head>";
 echo "<title>";
-echo "Login Page";
+echo "Register Page";
 echo "</title>";
 echo "<link rel='stylesheet' href='css/styles.css'>";
 echo "</head>";
@@ -21,7 +33,7 @@ echo "<div class='container'>";
 echo "<div id='content'>";
 echo "<h2 id='passcheck' align='center'>";
 echo "<u>";
-echo "Login Page";
+echo "Register Page";
 echo "</u>";
 echo "</h2>";
 echo "<br>";
@@ -101,20 +113,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-echo "<form action='login.php' method='post'>"; #Forming
-echo "<p id='ptext'>";
-echo "Enter username:";
-echo "</p>";
-echo "<input type='text' name='name' id='name' placeholder='Enter your username.' required>";
+echo "<label for='name'>Console Name</label>";
+echo "<input type='text' name='name' id='name' placeholder='Enter the console name.' required>";
 echo "<br>";
-echo "<p id='ptext'>";
-echo "Enter password:";
-echo "</p>";
-echo "<input type='password' name='password' placeholder='Enter password here...'>";
-echo "<br>";
-echo "<input type='submit' value='Login'>"; #The submit button.
-echo "</form>";
 
+echo "<label for='name'>Console </label>";
+echo "<input type='password' name='password' placeholder='Enter password here...' required>";
+echo "<br>";
+
+echo "<label for='email'>Email Address</label>";
+echo "<input type='email' name='email' id='email' placeholder='Enter your email.' required>";
+echo "<br>";
+
+echo "<input type='submit' value='Submit'>";
 
 echo "</div>";
 echo "</div>";
