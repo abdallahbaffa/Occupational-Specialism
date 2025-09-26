@@ -2,6 +2,18 @@
 
 session_start();
 
+require_once("assets/db-con.php");
+require_once("assets/common.php");
+
+if ($_SERVER["REQUEST_METHOD"] === "POST"){
+    try{
+        new_console(dbconnect_insert(), $_POST); /*Calling subroutine and one of the paramerters is calling another subroutine, and if the conncetion is succefful we return the conncetion to the database.*/
+        $_SESSION['usermessage'] = "SUCCESS: Console Created!";
+    } catch(PDOException $e){
+        $_SESSION['usermessage'] = $e->getMessage();
+    }
+}
+
 require_once "assets/common.php";
 
 echo "<!DOCTYPE html>";
