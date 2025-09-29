@@ -9,7 +9,7 @@ require_once "assets/db-con.php";
 if($_SERVER["REQUEST_METHOD"] === "POST") { //SHOULD ALWAYS BE TRIPLE '='!
     if(!only_user(dbconnect_insert(), $_POST["username"])) {
 
-        if(reg_user(dbconnect_insert(), $_POST["username"])) {
+        if(reg_user(dbconnect_insert(), $_POST)) {
             $_SESSION["username"] = "User was created successfully";
         } else {
             $_SESSION["username"] = "ERROR: User registration failed.";
@@ -43,12 +43,16 @@ echo "<br>";
 
     echo "<form method='post' action=''>";
 
-    echo "<label for='name'>Username</label>";
-    echo "<input type='text' name='name' id='name' placeholder='Enter username here...' required>";
+    echo "<label for='username'>Username</label>";
+    echo "<input type='text' name='username' id='name' placeholder='Enter username here...' required>";
     echo "<br>";
 
-    echo "<label for='name'>Password</label>";
-    echo "<input type='password' name='password' placeholder='Enter password here...' required>";
+    echo "<label for='password'>Password</label>";
+    echo "<input type='text' name='password' placeholder='Enter password here...' required>";
+    echo "<br>";
+
+    echo "<label for='signupdate'>Sign up date</label>";
+    echo "<input type='text' name='signupdate' placeholder='When did you sign up?'>";
     echo "<br>";
 
     echo "<label for='dateofbirth'>Date of Birth</label>";
