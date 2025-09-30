@@ -11,7 +11,6 @@ function new_console($conn, $post){
         $stmt->bindParam(4, $post['controller_no']);
         $stmt->bindParam(5, $post['bit']);
 
-
         $stmt->execute(); #Run the query to insert
         $conn = null; //Stops the connection. Should not be leaving open connections because it is not safe. Leaving a open active connection to your database.
     } catch (PDOException $e) {
