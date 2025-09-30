@@ -41,29 +41,30 @@ echo "</u>";
 echo "</h2>";
 echo "<br>";
 
+echo "<h1> User Page Registration </h1>";
+
+echo "<p id='intro'>Welcome to the user registration page! Wanna register?</p>";
+
     echo "<form method='post' action=''>";
 
-    echo "<label for='username'>Username</label>";
     echo "<input type='text' name='username' id='name' placeholder='Enter username here...' required>";
     echo "<br>";
 
-    echo "<label for='password'>Password</label>";
-    echo "<input type='text' name='password' placeholder='Enter password here...' required>";
+
+    echo "<input type='password' name='password' placeholder='Enter password here...' required>";
     echo "<br>";
 
-    echo "<label for='signupdate'>Sign up date</label>";
+
     echo "<input type='text' name='signupdate' placeholder='When did you sign up?'>";
     echo "<br>";
 
-    echo "<label for='dateofbirth'>Date of Birth</label>";
     echo "<input type='text' name='dob' placeholder='When were you born?'>";
     echo "<br>";
 
-    echo "<label for='country'>Country</label>";
     echo "<input type='text' name='country' placeholder='Country you live in?'>";
     echo "<br>";
 
-    echo "<input type='submit' value='Submit'>";
+    echo "<input type='submit' value='Register'>";
 
     echo "</form>";
 
