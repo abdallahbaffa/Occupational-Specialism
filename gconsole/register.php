@@ -5,19 +5,20 @@ session_start();
 require_once "assets/common.php";
 require_once "assets/db-con.php";
 
-
 if($_SERVER["REQUEST_METHOD"] === "POST") { //SHOULD ALWAYS BE TRIPLE '='!
+
     if(!only_user(dbconnect_insert(), $_POST["username"])) {
 
         if(reg_user(dbconnect_insert(), $_POST)) {
-            $_SESSION["username"] = "User was created successfully";
+            $_SESSION["usermessage"] = "USER WAS CREATED SUCCESSFULLY.";
         } else {
-            $_SESSION["username"] = "ERROR: User registration failed.";
+            $_SESSION["usermessage"] = "ERROR: USER REGISTRATION FAILED.";
         }
     }
 
-    $_SESSION["usermessage"] = "The result of the only user : " .only_user(dbconnect_insert(), $_POST["username"]);
+    $_SESSION["usermessage"] = "ERROR: THE USERNAME CANNOT BE USED" .only_user(dbconnect_insert(), $_POST["username"]);
 }
+
 
 echo "<!DOCTYPE html>";
 echo "<html>";
@@ -30,6 +31,7 @@ echo "</head>";
 echo "<body>";
 
 require_once "assets/topbar.php";
+
 require_once "assets/nav.php";
 
 echo "<div class='container'>";
@@ -47,13 +49,11 @@ echo "<p id='intro'>Welcome to the user registration page! Wanna register?</p>";
 
     echo "<form method='post' action=''>";
 
-    echo "<input type='text' name='username' id='name' placeholder='Enter username here...' required>";
+    echo "<input type='text' name='username' id='name' placeholder='Enter username here...'>";
     echo "<br>";
 
-
-    echo "<input type='password' name='password' placeholder='Enter password here...' required>";
+    echo "<input type='password' name='password' placeholder='Enter password here...'>";
     echo "<br>";
-
 
     echo "<input type='text' name='signupdate' placeholder='When did you sign up?'>";
     echo "<br>";
@@ -72,7 +72,9 @@ echo "<p id='intro'>Welcome to the user registration page! Wanna register?</p>";
     echo "<br>";
 
     echo "</div>";
+
     echo user_message();
+
     echo "</div>";
     echo "</body>";
     echo "</html>";
