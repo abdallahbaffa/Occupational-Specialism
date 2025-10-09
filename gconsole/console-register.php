@@ -5,6 +5,12 @@ session_start();
 require_once("assets/db-con.php");
 require_once("assets/common.php");
 
+if (!isset($_SESSION['user'])){
+    $_SESSION['usermessage'] = "ERROR: You are not logged in.";
+    header(header: "Location: login.php");
+    exit; //Stop further execution.
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST"){
     try{
         new_console(dbconnect_insert(), $_POST); /*Calling subroutine and one of the paramerters is calling another subroutine, and if the conncetion is succefful we return the conncetion to the database.*/

@@ -2,7 +2,43 @@
 
 session_start();
 
-require_once "assets/common.php";
+require_once ("assets/common.php");
+require_once("assets/db-con.php");
+
+if (isset($_SESSION['user'])){
+    $_SESSION['usermessage'] = "ERROR: You are already logged in!";
+    header(header: "Location: index.php");
+    exit; //Stop further execution.
+}
+elseif ($_SERVER["REQUEST_METHOD"] === "POST"){
+    $usr = login(dbconnect_insert(), $_POST["username"]);
+
+    if ($usr && password_verify($_POST["password"], $usr["password"]))
+    $_SESSION["user"] = true;
+    $_SESSION["userid"] = $usr["user_id"];
+    $_SESSION["usermessage"] = "SUCCESS: User Successfully Logged In";
+    header(header: "Location: index.php");
+    exit; //Stops further execution.
+    }
+elseif ($_SERVER["REQUEST_METHOD"] === "POST"){
+    $usr = login(dbconnect_insert(), $_POST["username"]);
+
+    if ($usr && password_verify($_POST["password"], $usr["password"])) {
+        $_SESSION["user"] = true;
+        $_SESSION["userid"] = $usr["user_id"];
+        $_SESSION["usermessage"] = "SUCCESS: User Successfully Logged In";
+        auditor(dbconnect_insert(), $_SESSION["userid"], "log", "User has successfully logged in");
+        header(header: "Location: index.php");
+        exit;}
+     else {
+         $_SESSION["usermessage"] = "ERROR: User login passwords do not match.";
+         if($usr["user_id"]){
+             auditor(dbconnect_insert(),$usr["user_id"],"flo", "User has unsuccessfully logged in");
+         }
+         header("location: login.php");
+         exit;
+        }
+    }
 
 echo "<!DOCTYPE html>";
 echo "<html>";

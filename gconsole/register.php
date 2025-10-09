@@ -7,16 +7,21 @@ require_once "assets/db-con.php";
 
 if($_SERVER["REQUEST_METHOD"] === "POST") { //SHOULD ALWAYS BE TRIPLE '='!
 
-    if(!only_user(dbconnect_insert(), $_POST["username"])) {
+    if (!only_user(dbconnect_insert(), $_POST["username"])) {
 
-        if(reg_user(dbconnect_insert(), $_POST)) {
+        if (reg_user(dbconnect_insert(), $_POST)) {
+            auditor(dbconnect_insert(), getnewuserid(dbconnect_insert(), $_POST["username"]), "reg", "New user registered");
             $_SESSION["usermessage"] = "USER WAS CREATED SUCCESSFULLY.";
+            header("location: index.php");
+            exit;
+
         } else {
             $_SESSION["usermessage"] = "ERROR: USER REGISTRATION FAILED.";
         }
+    } else {
+        $_SESSION["usermessage"] = "USERNAME CANNOT BE USED.";
     }
 
-    $_SESSION["usermessage"] = "ERROR: THE USERNAME CANNOT BE USED" .only_user(dbconnect_insert(), $_POST["username"]);
 }
 
 

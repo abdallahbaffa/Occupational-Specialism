@@ -8,8 +8,8 @@ if(!isset($_GET["message"])) {
     $message = htmlspecialchars(urldecode($_GET["message"]));
 }
 
-require_once "assets/db-con.php";
 require_once "assets/common.php";
+require_once "assets/db-con.php";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
