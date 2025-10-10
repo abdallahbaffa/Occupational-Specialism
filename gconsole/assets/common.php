@@ -1,14 +1,36 @@
 <?php /*Common subroutines go here*/
+function only_user($conn, $username)
+{
+    try {
+        $sql = "SELECT username FROM users WHERE username = ?"; //Set up the sql statement
+        $stmt = $conn->prepare($sql); //Prepares
+        $stmt->bindParam(1, $username); // Binded so it can be more secure.
+        $stmt->execute(); //Runs the sql code
+        $result = $stmt->fetch(PDO::FETCH_ASSOC); //Brings back results.
+        if ($result) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (PDOException $e) { //Catch error
+        //Log the error (crucial!)
+        error_log("Database error in only_user: " . $e->getMessage());
+        //Throw the exception.
+        throw $e; //Re-throw the exception.
+    }
+}
+
+
 
 function new_console($conn, $post){
     try {
-        $sql = "INSERT INTO consoles (manufacturer, console_name, release_date, controller_no, bit) VALUES(?, ?, ?, ?, ?)"; #Doing a prepared statement, telling the database that the values would be sent badned independately. If this approach was not done, it would be easier to sql inject your things, which is really bad.
+        $sql = "INSERT INTO consoles (manufacturer, console_name, release_date, controller_number, bit) VALUES(?, ?, ?, ?, ?)"; #Doing a prepared statement, telling the database that the values would be sent badned independately. If this approach was not done, it would be easier to sql inject your things, which is really bad.
         $stmt = $conn->prepare($sql); #Prepare to sql
 
         $stmt->bindParam(1, $post['manufacturer']); #Bind parameters for security
-        $stmt->bindParam(2, $post['c_name']);
+        $stmt->bindParam(2, $post['console_name']);
         $stmt->bindParam(3, $post['release']);
-        $stmt->bindParam(4, $post['controller_no']);
+        $stmt->bindParam(4, $post['controller_number']);
         $stmt->bindParam(5, $post['bit']);
 
         $stmt->execute(); #Run the query to insert
@@ -31,38 +53,18 @@ function user_message(){
     }
 }
 
-function only_user($conn, $username)
-{
-    try {
-        $sql = "SELECT username FROM users WHERE username = ?"; //Set up the sql statement
-        $stmt = $conn->prepare($sql); //Prepares
-        $stmt->bindParam(1, $username); // Binded so it can be more secure.
-        $stmt->execute(); //Runs the sql code
-        $result = $stmt->fetch(PDO::FETCH_ASSOC); //Brings back results.
-        if ($result) {
-            return true;
-        } else {
-            return false;
-        }
-    } catch (PDOException $e) { //Catch error
-        //Log the error (crucial!)
-        error_log("Database error in only_user: " . $e->getMessage());
-        //Throw the exception.
-        throw $e; //Re-throw the exception.
-    }
-}
 
 function reg_user($conn,$post){
       try {
           //Prepare and execute the SQL query.
-          $sql = "INSERT INTO users (username, password, signupdate, dob, country) VALUES(?, ?, ?, ?, ?)";
+          $sql = "INSERT INTO users (user_name, password, sign_up_date, date_of_birth, country) VALUES(?, ?, ?, ?, ?)";
           $stmt = $conn->prepare($sql); //Prepare to SQL.
 
-          $stmt->bindParam(1, $post['username']); //Bind parameters for security.
+          $stmt->bindParam(1, $post['user_name']); //Bind parameters for security.
           $hpswd = password_hash($post['password'], PASSWORD_DEFAULT); //Hash the password.  //Using a pre-built library as part of PHP to because my development environment has no encryption available. I am using default encryption is because I don't have anything else built into my development environment, if this was a real scenario, I would use another encryption method like: [PASSWORD_BCRYPT] OR [PASSWORD_ARGON2I] to make the encryption even more secure.
           $stmt->bindParam(2, $hpswd);
-          $stmt->bindParam(3, $post['signupdate']);
-          $stmt->bindParam(4, $post['dob']);
+          $stmt->bindParam(3, $post['sign_up_date']);
+          $stmt->bindParam(4, $post['date_of_birth']);
           $stmt->bindParam(5, $post['country']);
 
           $stmt->execute(); //Run the query to insert.
@@ -107,21 +109,6 @@ function login($conn, $usrname)
 }
 
 
-function auditor($conn, $userid, $code, $long_desc){
-    $sql = "INSERT INTO audits (date, userid, code, long_desc) VALUES (?,?,?,?)";
-    $stmt = $conn->prepare($sql); //prepare to sql
-    $date = date(format:'Y-m-d'); //exact mysql date field that it needs and accepts
-    $stmt->bindParam(1, $date); //bind parameters for security
-    $stmt->bindParam(2, $userid);
-    $stmt->bindParam(3, $code);
-    $stmt->bindParam(4, $long_desc);
-    
-    $stmt->execute(); //run the query to insert
-    $conn = null; //closes the connection so can not be abused
-    return true; //registration successful
-}
-
-
 function getnewuserid($conn, $email){
     $sql = "SELECT user_id FROM users WHERE username = ?";
     $stmt = $conn->prepare($sql); //prepares
@@ -129,4 +116,19 @@ function getnewuserid($conn, $email){
     $stmt->execute(); //runs the sql code
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     return $result['user_id'];
+}
+
+function auditor($conn, $userid, $code, $long_desc)
+{
+    $sql = "INSERT INTO audits (user_id, date, code, long_desc) VALUES (?,?,?,?)";
+    $stmt = $conn->prepare($sql); //prepare to sql
+    $date = date(format: 'Y-m-d'); //exact mysql date field that it needs and accepts
+    $stmt->bindParam(1, $userid); //bind parameters for security
+    $stmt->bindParam(2, $date);
+    $stmt->bindParam(3, $code);
+    $stmt->bindParam(4, $long_desc);
+
+    $stmt->execute(); //run the query to insert
+    $conn = null; //closes the connection so can not be abused
+    return true; //registration successful
 }

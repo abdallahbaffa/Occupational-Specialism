@@ -3,7 +3,7 @@
 session_start();
 
 require_once "assets/common.php";
-require_once "assets/db-con.php";
+require_once "assets/dbconn.php";
 
 if($_SERVER["REQUEST_METHOD"] === "POST") { //SHOULD ALWAYS BE TRIPLE '='!
 

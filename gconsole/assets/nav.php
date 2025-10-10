@@ -10,7 +10,7 @@ echo "<ul>";
         echo "<li> <a href='login.php'>User Login</a></li>";
     }
         else {
-            echo "<li> <a href='console-register.php'>Console Register</a></li>";
+            echo "<li> <a href='console_register.php'>Console Register</a></li>";
             echo "<li> <a href='logout.php'>Logout</a></li>";
         }
 echo "</ul>";
