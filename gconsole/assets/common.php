@@ -1,10 +1,10 @@
 <?php /*Common subroutines go here*/
-function only_user($conn, $username)
+function only_user($conn, $user_name)
 {
     try {
-        $sql = "SELECT username FROM users WHERE username = ?"; //Set up the sql statement
+        $sql = "SELECT user_name FROM users WHERE user_name = ?"; //Set up the sql statement
         $stmt = $conn->prepare($sql); //Prepares
-        $stmt->bindParam(1, $username); // Binded so it can be more secure.
+        $stmt->bindParam(1, $user_name); // Binded so it can be more secure.
         $stmt->execute(); //Runs the sql code
         $result = $stmt->fetch(PDO::FETCH_ASSOC); //Brings back results.
         if ($result) {
@@ -29,16 +29,20 @@ function new_console($conn, $post){
 
         $stmt->bindParam(1, $post['manufacturer']); #Bind parameters for security
         $stmt->bindParam(2, $post['console_name']);
-        $stmt->bindParam(3, $post['release']);
+        $stmt->bindParam(3, $post['release_date']);
         $stmt->bindParam(4, $post['controller_number']);
         $stmt->bindParam(5, $post['bit']);
 
         $stmt->execute(); #Run the query to insert
         $conn = null; //Stops the connection. Should not be leaving open connections because it is not safe. Leaving an open active connection to your database.
     } catch (PDOException $e) {
-        #Handles database errors
-        error_log("Console Database Error: " . $e->getMessage());
-        throw new exception("Database Error: " . $e->getMessage());
+        //Handle database errors
+        error_log("Audit Database Error: " . $e->getMessage()); //log the error
+        throw new exception("Audit Database Error: " . $e->getMessage()); //Throw exception for calling script to handle.
+    } catch (Exception $e) {
+        // handle validation or other errors,
+        error_log("Auditing Error: " . $e->getMessage()); //log the error
+        throw new exception("Auditing Error: " . $e->getMessage()); //Throw exception for calling script to handle.
     }
 }
 
@@ -47,9 +51,9 @@ function user_message(){
     $message = "<p>". $_SESSION['usermessage'] ."</p>";
     unset($_SESSION['usermessage']);
     return $message;
-    }
-    else {
-        return "";
+    } else{
+        $message = "";
+        return $message;
     }
 }
 
@@ -73,7 +77,7 @@ function reg_user($conn,$post){
       } catch (PDOException $e) {
         //Handle database errors.
           error_log("User Register Database error: " . $e->getMessage()); //Log the error.
-          throw new exception("User Register Database Error: " . $e->getMessage()); //Throw exception for calling scripts.
+          throw new exception("User Register Database Error: " . $e); //Throw exception for calling scripts.
       } catch (Exception $e) {
           //Handle validation or other errors.
           error_log("User Registration error: " . $e->getMessage()); //Log the error.
@@ -85,44 +89,44 @@ function reg_user($conn,$post){
 function login($conn, $usrname)
 {
     try { //try this code, catch errors
-        $sql = "SELECT user_id, password FROM users WHERE username = ?"; // set up the sql statement.
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(1, $usrname);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $conn = null;
+        $sql = "SELECT user_id, password FROM users WHERE user_name = ?"; // set up the sql statement.
+        $stmt = $conn->prepare($sql); //prepares
+        $stmt->bindParam(1,$usrname); //binds the parameters to execute
+        $stmt->execute(); //runs the sql code
+        $result = $stmt->fetch(PDO::FETCH_ASSOC); //brings back results
+        $conn = null; //nulls off the connection so can not be abused.
 
         if ($result) {
             return $result;
 
         } else {
             $_SESSION['usermessage'] = "User not found.";
-            header(header: "Location: index.php");
-            exit;
+            header("Location: login.php");
+            exit; //stops further execution
         }
 
     } catch (Exception $e) {
         $_SESSION['usermessage'] = "User login" . $e->getMessage();
-        header(header: "Location: login.php");
-        exit;
+        header("Location: login.php");
+        exit; //stops further execution
     }
 }
 
 
 function getnewuserid($conn, $email){
-    $sql = "SELECT user_id FROM users WHERE username = ?";
+    $sql = "SELECT user_id FROM users WHERE user_name = ?";
     $stmt = $conn->prepare($sql); //prepares
     $stmt->bindParam(1, $email);
     $stmt->execute(); //runs the sql code
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $conn = null;
     return $result['user_id'];
 }
 
-function auditor($conn, $userid, $code, $long_desc)
-{
-    $sql = "INSERT INTO audits (user_id, date, code, long_desc) VALUES (?,?,?,?)";
-    $stmt = $conn->prepare($sql); //prepare to sql
-    $date = date(format: 'Y-m-d'); //exact mysql date field that it needs and accepts
+function auditor($conn, $userid, $code, $long_desc){ //on doing any action, auditor is called and the action is recorded.
+    $sql = "INSERT INTO audits (user_id, date, code, long_desc) VALUES (?,?,?,?)"; //prepare the sql to be sent.
+    $stmt = $conn->prepare($sql); //prepare to sql.
+    $date = date('Y-m-d'); //only variables should be passed, not direct calls to functions
     $stmt->bindParam(1, $userid); //bind parameters for security
     $stmt->bindParam(2, $date);
     $stmt->bindParam(3, $code);

@@ -36,7 +36,7 @@ require_once "assets/topbar.php";
 
 require_once "assets/nav.php";
 
-echo "<div id='content'>";
+echo "<div class='content'>";
 
 if (!$message) {
     echo user_message();

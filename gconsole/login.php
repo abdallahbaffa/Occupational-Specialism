@@ -7,11 +7,11 @@ require_once("assets/dbconn.php");
 
 if (isset($_SESSION['user'])){
     $_SESSION['usermessage'] = "ERROR: You are already logged in!";
-    header(header: "Location: index.php");
+    header("Location: index.php");
     exit; //Stop further execution.
 }
 elseif ($_SERVER["REQUEST_METHOD"] === "POST"){
-    $usr = login(dbconnect_insert(), $_POST["username"]);
+    $usr = login(dbconnect_insert(), $_POST["user_name"]);
 
     if ($usr && password_verify($_POST["password"], $usr["password"]))
     $_SESSION["user"] = true;
@@ -21,14 +21,14 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST"){
     exit; //Stops further execution.
     }
 elseif ($_SERVER["REQUEST_METHOD"] === "POST"){
-    $usr = login(dbconnect_insert(), $_POST["username"]);
+    $usr = login(dbconnect_insert(), $_POST["user_name"]);
 
     if ($usr && password_verify($_POST["password"], $usr["password"])) {
         $_SESSION["user"] = true;
         $_SESSION["userid"] = $usr["user_id"];
         $_SESSION["usermessage"] = "SUCCESS: User Successfully Logged In";
         auditor(dbconnect_insert(), $_SESSION["userid"], "log", "User has successfully logged in");
-        header(header: "Location: index.php");
+        header("Location: index.php");
         exit;}
      else {
          $_SESSION["usermessage"] = "ERROR: User login passwords do not match.";
@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     echo "<p id='ptext'>";
     echo "Enter username:";
     echo "</p>";
-    echo "<input type='text' name='name' id='name' placeholder='Enter username here...' required>";
+    echo "<input type='text' name='user_name' id='name' placeholder='Enter username here...' required>";
     echo "<br>";
     echo "<p id='ptext'>";
     echo "Enter password:";

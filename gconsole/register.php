@@ -7,12 +7,12 @@ require_once "assets/dbconn.php";
 
 if($_SERVER["REQUEST_METHOD"] === "POST") { //SHOULD ALWAYS BE TRIPLE '='!
 
-    if (!only_user(dbconnect_insert(), $_POST["username"])) {
+    if (!only_user(dbconnect_insert(), $_POST["user_name"])) {
 
         if (reg_user(dbconnect_insert(), $_POST)) {
-            auditor(dbconnect_insert(), getnewuserid(dbconnect_insert(), $_POST["username"]), "reg", "New user registered");
+            auditor(dbconnect_insert(), getnewuserid(dbconnect_insert(), $_POST["user_name"]), "reg", "New user registered");
             $_SESSION["usermessage"] = "USER WAS CREATED SUCCESSFULLY.";
-            header("location: index.php");
+            header("Location: index.php");
             exit;
 
         } else {
@@ -54,16 +54,16 @@ echo "<p id='intro'>Welcome to the user registration page! Wanna register?</p>";
 
     echo "<form method='post' action=''>";
 
-    echo "<input type='text' name='username' id='name' placeholder='Enter username here...'>";
+    echo "<input type='text' name='user_name' id='name' placeholder='Enter username here...'>";
     echo "<br>";
 
     echo "<input type='password' name='password' placeholder='Enter password here...'>";
     echo "<br>";
 
-    echo "<input type='text' name='signupdate' placeholder='When did you sign up?'>";
+    echo "<input type='text' name='sign_up_date' placeholder='When did you sign up?'>";
     echo "<br>";
 
-    echo "<input type='text' name='dob' placeholder='When were you born?'>";
+    echo "<input type='text' name='date_of_birth' placeholder='When were you born?'>";
     echo "<br>";
 
     echo "<input type='text' name='country' placeholder='Country you live in?'>";
@@ -76,9 +76,10 @@ echo "<p id='intro'>Welcome to the user registration page! Wanna register?</p>";
     echo "<br>";
     echo "<br>";
 
-    echo "</div>";
 
     echo user_message();
+
+    echo "</div>";
 
     echo "</div>";
     echo "</body>";
