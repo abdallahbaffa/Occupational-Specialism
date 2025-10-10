@@ -1,24 +1,27 @@
 <?php
 
 function dbconnect_insert(){
-    // The variables are defined locally inside the function
-    $servername = "localhost";
-    $dbusername = "root"; #SHOULD NOT USE ROOT TO ACCESS A DATABASE
-    $dbpassword = "";
-    $dbname = "gconsole";
+    //the variables are defined locally inside the function.
+    $servername = "localhost"; //sets servername.
+
+    $dbusername = "root"; //this had to be changed, this variable name, as it fought against the admin reg and user reg.
+
+    $dbpassword = ""; //password for database useraccount.
+
+    $dbname = "gconsole"; //database name to connect to.
 
     /*THESE THINGS SHOULD NOT BE STORED IN PLAIN TEXT!! VERY INSECURE!!*/
 
     try {
-        // The variables are used locally and correctly here
-        $conn = new PDO("mysql:host=$servername;port=3306;dbname=$dbname", $dbusername, $dbpassword);
+        //the variables are used locally and correctly here.
+        $conn = new PDO("mysql:host=$servername;port=3306;dbname=$dbname", $dbusername, $dbpassword); //creates a PDO connection to the database.
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Return the connection object
+        //return the connection object.
         return $conn;
     } catch(PDOException $e) {
         error_log("Database error in super_checker: " . $e->getMessage());
-        throw $e;
+        throw $e; //re-throw the exception //outputs the error.
     }
 }
 

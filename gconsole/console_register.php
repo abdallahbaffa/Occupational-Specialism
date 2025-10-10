@@ -7,7 +7,7 @@ require_once("assets/dbconn.php");
 
 if (!isset($_SESSION['user'])){
     $_SESSION['usermessage'] = "ERROR: You are not logged in.";
-    header(header: "Location: login.php");
+    header("Location: login.php");
     exit; //Stop further execution.
 }
 
@@ -38,8 +38,6 @@ echo "<div class='container'>";
 require_once "assets/topbar.php";
 require_once "assets/nav.php";
 
-
-echo "<div class='container'>";
 echo "<div id='content'>";
 echo "<h2 id='passcheck' align='center'>";
 echo "<u>";
@@ -47,6 +45,8 @@ echo "Console Register Page";
 echo "</u>";
 echo "</h2>";
 echo "<br>";
+
+
 echo "<div class='content'>";
 
 
@@ -56,22 +56,28 @@ echo "<br>";
 
 echo "<p id='intro'>Welcome to the home of tracking the consoles you own.</p>";
 
+
+echo "<br>";
+echo user_message();
+echo "<br>";
+
+
 echo "<form method='post' action=''>";
 
 echo "<input type='text' name='manufacturer' placeholder='Manufacturer'>";
 echo "<br>";
-echo "<input type='text' name='c_name' placeholder='Console Name'>";
+echo "<input type='text' name='console_name' placeholder='Console Name'>";
 echo "<br>";
 echo "<input type='text' name='release' placeholder='Release Date'>";
 echo "<br>";
-echo "<input type='text' name='controller_no' placeholder='Number of Controllers'>";
+echo "<input type='text' name='controller_number' placeholder='Number of Controllers'>";
 echo "<br>";
-echo "<input type='text' name='bit' placeholder='Bit of the console'>";
+echo "<input type='text' name='bit' placeholder='Number of Bits.'>";
 echo "<br>";
 echo "<input type='submit' name='submit' value='Register'>";
 
 echo "</div>";
-echo user_message();
+
 echo "</div>";
 
 echo "</body>";

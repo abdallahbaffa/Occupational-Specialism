@@ -3,7 +3,7 @@ echo "<div class='navi'>";
 echo "<nav>";
 
 echo "<ul>";
-    echo "<li> <a href='index.php'>Home</a></li>";
+    echo "<li> <a href='index.php'>Home</a></li>"; //opem a cell for a link to be housed.
 
     if(!isset($_SESSION["user"])){
         echo "<li> <a href='register.php'>User Register</a></li>";
@@ -13,7 +13,7 @@ echo "<ul>";
             echo "<li> <a href='console_register.php'>Console Register</a></li>";
             echo "<li> <a href='logout.php'>Logout</a></li>";
         }
-echo "</ul>";
+echo "</ul>"; //closes the row of the table.
 
 echo "</nav>";
 
