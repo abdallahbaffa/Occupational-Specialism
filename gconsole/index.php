@@ -1,42 +1,53 @@
-<?php
+<?php // This open the php code section
 
-if(!isset($_GET["message"])) {
+if (!isset($_GET['message'])) {
     session_start();
     $message = false;
 } else {
-    //Decode the message for display.
-    $message = htmlspecialchars(urldecode($_GET["message"]));
+    // Decode the message for display
+    $message = htmlspecialchars(urldecode($_GET['message']));
 }
 
-require_once "assets/common.php";
-require_once "assets/dbconn.php";
+require_once("assets/dbconn.php");
+require_once("assets/common.php");
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+echo "<!DOCTYPE html>";  # essential html line to dictate the page type
 
-    $_SESSION["msg"] = $_POST["message"];
-}
+echo "<html>";  # opens the html content of the page
 
-echo "<!DOCTYPE html>";
-// Start of the HTML document
-echo "<html>";
+echo "<head>";  # opens the head section
+echo "<title> GConsole</title>";  # sets the title of the page (web browser tab)
+echo "<link rel='stylesheet' type='text/css' href='css/styles.css' />";  # links to the external style sheet
+echo "</head>";  # closes the head section of the page
 
-echo "<head>";
-
-echo "<title>Games Consoles</title>";
-// Links to the external CSS file, 'styles.css', which handles the website's design
-echo "<link rel='stylesheet' href='css/styles.css'>";
-
-echo "</head>";
-
-echo "<body>";
-
+echo "<body>";  # opens the body for the main content of the page.
 echo "<div class='container'>";
 
 require_once "assets/topbar.php";
-
 require_once "assets/nav.php";
 
+echo "<div id='content'>";
+
+echo "<h2 id='passcheck' align='center'>";
+echo "<u>";
+echo "Home Page";
+echo "</u>";
+echo "</h2>";
+
+echo "<br>";
+
 echo "<div class='content'>";
+
+echo "<h1> G Console </h1>";
+echo "<br>";
+
+echo "<p id='intro'>Welcome to the home of tracking the consoles you own</p>";
+echo "<p id='usemenu'> Use the nav bar to navigate to the page you need </p>";
+
+// Display the image you added
+echo "<img src='images/image_index.png'>"; # Index image picture.
+
+echo "<br>";
 
 if (!$message) {
     echo user_message();
@@ -44,18 +55,10 @@ if (!$message) {
     echo $message;
 }
 
-try {
-    $conn = dbconnect_insert();
-        echo"success";
-} catch (PDOException $e) {
-    echo $e->getMessage();
-}
+echo "</div>"; // Closes div class='content'
 
-echo "<img src='images/image_index.png'>"; # Index image picture.
-
-echo "</div>";
-
-echo "</div>";
+echo "</div>"; // Closes div id='content'
+echo "</div>"; // Closes div class='container'
 
 echo "</body>";
 
