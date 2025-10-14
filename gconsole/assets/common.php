@@ -79,12 +79,12 @@ function reg_user($conn,$post){
     }
 }
 
-function login($conn, $usrname)
+function login($conn, $username)
 {
     try { //try this code, catch errors
         $sql = "SELECT user_id, password FROM users WHERE user_name = ?"; // set up the sql statement.
         $stmt = $conn->prepare($sql); //prepares
-        $stmt->bindParam(1,$usrname); //binds the parameters to execute
+        $stmt->bindParam(1,$username); //binds the parameters to execute
         $stmt->execute(); //runs the sql code
         $result = $stmt->fetch(PDO::FETCH_ASSOC); //brings back results
         $conn = null; //nulls off the connection so can not be abused.
