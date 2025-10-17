@@ -85,4 +85,19 @@ function staff_getter($conn){
 }
 
 
+function commit_booking($conn, $epoch){
+    $sql = "INSERT INTO book (userid, staffid, appountmentdate, bookedon) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql); //prepare to sql
+
+    $stmt->bindParam(1, $_SESSION["userid"]); //bind parameters for security.
+    //Hash the password.
+    $stmt->bindParam(2, $_POST["staff"]);
+    $stmt->bindParam(3, $epoch);
+    $stmt->bindParam(4, time());
+
+    $stmt->execute(); // run the query to insert.
+    $conn = null; //closes the connection so cant be abused.
+    return true; // Registration successful.
+}
+
 ?>
