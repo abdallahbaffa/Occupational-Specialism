@@ -2,12 +2,12 @@
 // assets/common.php
 // This file contains common functions used across the application.
 
-// Function to handle session-based messages (existing)
+// Function to handle session-based messages (existing).
 function user_message() {
     if (isset($_SESSION["msg"])) {
         $message = $_SESSION["msg"];
         unset($_SESSION["msg"]);
-        // Add some basic HTML formatting for the message if needed
+        // Add some basic HTML formatting for the message if needed.
         // return "<div class='message'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</div>";
         return "<div class='message'>{$message}</div>"; // Using echo'd version from original register.php
     }
@@ -104,7 +104,7 @@ function commit_booking($conn, $epoch){
 function appt_getter($conn){
     //function  to get all the staff suitable for an appointment
 
-    $sql = "SELECT b.bookid, b.appointmentdate, b.bookedon, s.role, s.fname, s.sname, s.room FROM book b JOIN staff s ON b.staffid = s.staffid WHERE b.userid = ? ORDER BY b.appointmentdate ASC";
+    $sql = "SELECT b.bookid, b.appointmentdate, b.bookedon, s.role, s.fname, s.sname, s.room FROM book b JOIN staff s ON b.staffid = s.staffid WHERE b.userid = ? ORDER BY b.appointmentdate ASC"; //BASICALLY the FROM and JOIN the first words are the table names form the SQL, and then the letters after (I think thye can be words too) are basically what they should be named.
     $stmt = $conn->prepare($sql);
 
     $stmt->bindParam(1, $_SESSION["userid"]);
@@ -117,5 +117,7 @@ function appt_getter($conn){
         return false;
     }
 }
+
+
 
 ?>
