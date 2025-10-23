@@ -39,7 +39,6 @@ require_once '../assets/dbconn.php';
     <p>Hello, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User', ENT_QUOTES, 'UTF-8'); ?>!</p>
     <a href="index.php">Go to Homepage</a> <!-- Or wherever the main logged-in page is -->
     <!-- The logout link will be in the nav bar, handled by nav.php -->
-    <!--
 <?php endif; ?>
 
 <!-- Close the content wrapper div (from content.php) -->
