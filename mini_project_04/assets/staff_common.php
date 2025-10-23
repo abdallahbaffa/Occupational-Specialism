@@ -1,39 +1,72 @@
 <?php
+// assets/staff_common.php
+// This file contains functions specifically for staff management.
 
-function staff_auditor($conn, $staffid, $code, $long_desc)
-{
-// *** Added: Use a try...catch block for professional error handling ***
-try {
-// *** Added: Input Validation ***
-// Checks if the required user ID is numeric/valid and if code/desc are not empty.
-if (!is_numeric($staffid) || $staffid <= 0 || empty($code) || empty($long_desc)) {
-// Throw a general exception if data is invalid BEFORE hitting the database
-throw new Exception("Audit data missing or invalid.");
-}
-// 1. SQL Statement and Preparation (Same as original)
-$sql = "INSERT INTO staff_audits (user_id, date, code, long_desc) VALUES (?,?,?,?)";
-$stmt = $conn->prepare($sql);
-// 2. Date/Time Capture (Same as original)
-$date = date('Y-m-d');
-// 3. Binding Parameters (Same as original)
-$stmt->bindParam(1, $staffid);
-$stmt->bindParam(2, $date);
-$stmt->bindParam(3, $code);
-$stmt->bindParam(4, $long_desc);
-// 4. Execution (Same as original)
-$stmt->execute();
-// 5. Connection Management (Fixed: Use $conn = null; instead of undefined close_connection())
-$conn = null; // Close the connection properly
-return true;
-} catch (PDOException $e) {
-// Handles database errors (e.g., table/column mismatch)
-error_log("Audit Database Error: " . $e->getMessage());
-throw new Exception("Audit Database Error: " . $e->getMessage());
-} catch (Exception $e) {
-// Handles validation errors (thrown above) or other runtime errors
-error_log("Audit Runtime Error: " . $e->getMessage());
-throw new Exception("Audit Runtime Error: " . $e->getMessage());
-}
+/**
+ * Displays and clears a session message.
+ * We add this here so staff pages don't need to include the user 'common.php'
+ */
+function user_message() {
+    if (isset($_SESSION["msg"])) {
+        $message = $_SESSION["msg"];
+        unset($_SESSION["msg"]);
+        return "<div class='message'>{$message}</div>";
+    }
+    return "";
 }
 
+/**
+ * Inserts a new staff member into the database.
+ * Matches the columns in your 'staff' table.
+ */
+function staffreg_user($conn) {
+    // SQL uses the columns from your primary_oaks.sql file
+    $sql = "INSERT INTO staff (role, first_name, last_name, room) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+
+    // Bind parameters from the POST data
+    $stmt->bindParam(1, $_POST['role']);
+    $stmt->bindParam(2, $_POST['first_name']);
+    $stmt->bindParam(3, $_POST['last_name']);
+    $stmt->bindParam(4, $_POST['room']);
+
+    $stmt->execute();
+
+    // Get the ID of the new staff member we just created
+    $new_staff_id = $conn->lastInsertId();
+
+    $conn = null;
+    return $new_staff_id; // Return the new ID so we can audit it
+}
+
+/**
+ * Logs an action to the 'staff_audits' table.
+ * Matches your 'staff_common.php' and database schema.
+ */
+function staff_auditor($conn, $staffid, $code, $long_desc) {
+    try {
+        if (!is_numeric($staffid) || $staffid <= 0 || empty($code) || empty($long_desc)) {
+            throw new Exception("Staff audit data missing or invalid.");
+        }
+
+        // SQL matches your 'staff_audits' table
+        $sql = "INSERT INTO staff_audits (staff_id, date, code, long_desc) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+
+        $date = date('Y-m-d H:i:s'); // Use full datetime
+
+        $stmt->bindParam(1, $staffid);
+        $stmt->bindParam(2, $date);
+        $stmt->bindParam(3, $code);
+        $stmt->bindParam(4, $long_desc);
+
+        $stmt->execute();
+        $conn = null;
+        return true;
+
+    } catch (Exception $e) {
+        error_log("Staff Audit Error: " . $e->getMessage());
+        return false;
+    }
+}
 ?>
