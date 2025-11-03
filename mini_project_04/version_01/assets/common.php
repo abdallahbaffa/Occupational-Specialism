@@ -86,7 +86,7 @@ function appt_getter($conn){
  * NEW: Cancels (deletes) an appointment.
  * Security: It also checks the user_id to make sure you can only cancel your own appointments.
  */
-function cancel_appt($conn, $book_id, $user_id) {
+function appt_cancel($conn, $book_id, $user_id) {
     $sql = "DELETE FROM book WHERE book_id = ? AND user_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(1, $book_id);
@@ -112,11 +112,15 @@ function appt_fetch($conn, $book_id, $user_id) {
     return $result ?: false; // Return the appointment data or false if not found
 }
 
+{
+
+}
+
 /**
  * NEW: Updates an existing appointment.
  * Security: Also checks user_id.
  */
-function update_appt($conn, $book_id, $user_id, $staff_id, $epoch_time) {
+function appt_update($conn, $book_id, $user_id, $staff_id, $epoch_time) {
     $sql = "UPDATE book SET staff_id = ?, appointment_date = ? WHERE book_id = ? AND user_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(1, $staff_id);
@@ -129,4 +133,3 @@ function update_appt($conn, $book_id, $user_id, $staff_id, $epoch_time) {
 }
 
 ?>
-

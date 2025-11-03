@@ -8,11 +8,19 @@ if (!isset($_SESSION['user_id'])) {
     $_SESSION['msg'] = "You must log in to book an appointment.";
     header("Location: login.php");
     exit;
+} elseif($_SERVER["REQUEST_METHOD"] === "POST") {
+    $tmp = $_POST["appt_date"] . ' ' . $_POST["appt_time"];
+    $epoch_time = strtotime($tmp);
+    if(appt_update(dbconnect_insert(), $_SESSION['apptid'], $epoch_time, $tmp)){
+        $_SESSION['usermessage'] = "Appointment booked successfully.";
+        unset($_SESSION['apptid']);
+    } //I think it should be wrapped in a try catch? I think it would make it better quality?
 }
 
 // 2. Check if we are in the middle of editing an appointment
 if (!isset($_SESSION['edit_book_id'])) {
     $_SESSION['msg'] = "ERROR: No appointment selected to edit.";
+    unset($_SESSION['apptid']);
     header("Location: bookings.php");
     exit;
 }
@@ -39,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['msg'] = "ERROR: Please select a valid date and time in the future.";
         } else {
             // Call the new update_appt function
-            if (update_appt(dbconnect_insert(), $book_id_to_edit, $user_id, $new_staff_id, $new_epoch_time)) {
+            if (appt_update(dbconnect_insert(), $book_id_to_edit, $user_id, $new_staff_id, $new_epoch_time)) {
 
                 audit_write($user_id, 'BOOK_UPDATE', "User updated booking ID: $book_id_to_edit");
 
@@ -117,7 +125,7 @@ $message = user_message();
     <!-- We use 'value' to pre-fill the form with the current appointment date -->
     <input type="date" id="appt_date" name="appt_date" value="<?php echo htmlspecialchars($appt_date_val); ?>" required><br><br>
 
-    <label for="appt_time">Appointment Time:</label><br>
+    <label for="appt_time">Appointment Time:</label><br> <!--Showing the users what they have done. -->
     <!-- We use 'value' to pre-fill the form with the current appointment time -->
     <input type="time" id="appt_time" name="appt_time" step="600" value="<?php echo htmlspecialchars($appt_time_val); ?>" required><br><br>
 

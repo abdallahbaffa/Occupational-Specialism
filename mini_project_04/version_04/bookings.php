@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // --- NEW: Handle form submissions (Cancel or Change) ---
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $book_id = $_POST['book_id'] ?? 0;
     $user_id = $_SESSION['user_id'];
     $action = $_POST['action'] ?? '';
@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         if ($action == 'delete' && $book_id > 0) {
             // --- Handle Cancel ---
-            cancel_appt(dbconnect_insert(), $book_id, $user_id);
+            appt_cancel(dbconnect_insert(), $book_id, $user_id);
             audit_write($user_id, 'BOOK_CANCEL', "User cancelled booking ID: $book_id");
             $_SESSION['msg'] = "SUCCESS: Your appointment has been cancelled.";
 
@@ -131,4 +131,3 @@ try {
 </div> <!-- Closes the content div -->
 </body>
 </html>
-

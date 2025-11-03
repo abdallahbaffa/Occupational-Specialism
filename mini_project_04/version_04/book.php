@@ -115,4 +115,3 @@ $message = user_message(); // This function also clears the message
 
 </body>
 </html>
-
