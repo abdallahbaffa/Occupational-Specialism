@@ -1,7 +1,7 @@
 <?php
 session_start();
 $user_id_to_log = $_SESSION['user_id'] ?? 0;
-require_once '../assets/common.php';
+require_once 'assets/common.php';
 
 if ($user_id_to_log > 0) {
     audit_write($user_id_to_log, 'LOGOUT', 'User logged out successfully. IP: ' . $_SERVER['REMOTE_ADDR']);

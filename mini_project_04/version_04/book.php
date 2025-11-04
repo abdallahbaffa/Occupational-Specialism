@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once "../assets/common.php";
-require_once "../assets/dbconn.php";
+require_once "assets/common.php";
+require_once "assets/dbconn.php";
 
 // 1. Check if user is logged in. If not, redirect to login.
 if (!isset($_SESSION['user_id'])) {
@@ -62,14 +62,14 @@ $message = user_message(); // This function also clears the message
 <html>
 <head>
     <title>Book Appointment - Primary Oaks</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
 <!-- Include standard layout files -->
-<?php require_once '../assets/topbar.php'; ?>
-<?php require_once '../assets/nav.php'; ?>
-<?php require_once '../assets/content.php'; ?>
+<?php require_once 'assets/topbar.php'; ?>
+<?php require_once 'assets/nav.php'; ?>
+<?php require_once 'assets/content.php'; ?>
 
 <h1>Book an Appointment</h1>
 <hr>

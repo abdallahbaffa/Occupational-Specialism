@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once '../assets/dbconn.php';
-require_once '../assets/staff_common.php'; // Use the new staff common file
+require_once 'assets/dbconn.php';
+require_once 'assets/staff_common.php'; // Use the new staff common file
 
 // This page is for admins. We should add an admin login check here later,
 // but for now, we'll just check for a basic user login.
@@ -53,13 +53,13 @@ $message = user_message();
 <html>
 <head>
     <title>Register Staff - Primary Oaks</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-<?php require_once '../assets/topbar.php'; ?>
-<?php require_once '../assets/nav.php'; ?>
-<?php require_once '../assets/content.php'; ?>
+<?php require_once 'assets/topbar.php'; ?>
+<?php require_once 'assets/nav.php'; ?>
+<?php require_once 'assets/content.php'; ?>
 
 <h1>Register New Staff Member</h1>
 <hr>

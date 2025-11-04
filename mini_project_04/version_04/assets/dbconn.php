@@ -1,32 +1,38 @@
 <?php
-// Optional: Start session here if needed by functions in this file, but usually not necessary
-// if (session_status() === PHP_SESSION_NONE) {
-//    session_start();
-// }
+/**
+ * assets/dbconn.php
+ * Central PDO connector. Matches his DB name and keeps behavior simple.
+ * No echoes here (library file). Clean, reliable, and identical for read/write.
+ */
 
-function dbconnect_insert(){
-    // The variables are defined locally inside the function
-    $servername = "localhost";
-    $dbusername = "root"; #SHOULD NOT USE ROOT TO ACCESS A DATABASE
-    $dbpassword = "";
-    $dbname = "primary_oaks"; // <-- Make sure this DB exists
-
-    /*THESE THINGS SHOULD NOT BE STORED IN PLAIN TEXT!! VERY INSECURE!!*/
-
-    try {
-        // The variables are used locally and correctly here
-        $conn = new PDO("mysql:host=$servername;port=3306;dbname=$dbname", $dbusername, $dbpassword);
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Return the connection object
-        return $conn;
-    } catch(PDOException $e) {
-        error_log("Database error in dbconnect_insert: " . $e->getMessage());
-        throw $e;
-    }
+function dbconnect_read() {
+    // Connect for SELECTs (same settings as write; separated for clarity)
+    return _dbconnect_core();
 }
 
-// !!! IMPORTANT: You must call the function to get the connection
-// Example of calling the function later in your script:
-// $conn = dbconnect_insert();
-?>
+function dbconnect_insert() {
+    // Connect for INSERT/UPDATE/DELETE
+    return _dbconnect_core();
+}
+
+function _dbconnect_core() {
+    // --- Adjust only if your credentials differ ---
+    $host    = 'localhost';         // DB host
+    $dbname  = 'primaryoaks';       // IMPORTANT: matches his schema name
+    $user    = 'root';              // Your MySQL username
+    $pass    = '';                  // Your MySQL password (if any)
+    $charset = 'utf8mb4';           // Safe default charset
+
+    // PDO DSN string (MySQL)
+    $dsn = "mysql:host={$host};dbname={$dbname};charset={$charset}";
+
+    // PDO options for consistent, safe behavior
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Throw exceptions on errors
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Return rows as assoc arrays
+        PDO::ATTR_EMULATE_PREPARES   => false,                  // Use native prepares when possible
+    ];
+
+    // Create and return the PDO instance
+    return new PDO($dsn, $user, $pass, $options);
+}

@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once '../assets/dbconn.php';
-require_once '../assets/common.php';
+require_once 'assets/dbconn.php';
+require_once 'assets/common.php';
 
 $feedback = ""; // To store error messages
 $email_preset = ""; // To re-fill the email field on a failed attempt
@@ -81,12 +81,12 @@ $message = user_message();
 <html>
 <head>
     <title>Login - Primary Oaks Surgery</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<?php require_once '../assets/topbar.php'; ?>
-<?php require_once '../assets/nav.php'; ?>
-<?php require_once '../assets/content.php'; ?>
+<?php require_once 'assets/topbar.php'; ?>
+<?php require_once 'assets/nav.php'; ?>
+<?php require_once 'assets/content.php'; ?>
 
 <h1>Login to Your Account</h1>
 <hr>
