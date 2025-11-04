@@ -1,0 +1,1596 @@
+# Codebase export
+Source: C:\Users\User\PhpstormProjects\Occupational-Specialism\mini_project_04
+Date:   2025-11-04T09:00:59.5319340+00:00
+Files:  15
+
+===== BEGIN FILE: version_04\alterbooking.php =====
+```php
+<?php
+session_start();
+require_once "assets/common.php";
+require_once "assets/dbconn.php";
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['msg'] = "You must log in to book an appointment.";
+    header("Location: login.php");
+    exit;
+} elseif($_SERVER["REQUEST_METHOD"] === "POST") {
+    $tmp = $_POST["appt_date"] . ' ' . $_POST["appt_time"];
+    $epoch_time = strtotime($tmp);
+    if(appt_update(dbconnect_insert(), $_SESSION['apptid'], $epoch_time, $tmp)){
+        $_SESSION['usermessage'] = "Appointment booked successfully.";
+        unset($_SESSION['apptid']);
+    }
+}
+if (!isset($_SESSION['edit_book_id'])) {
+    $_SESSION['msg'] = "ERROR: No appointment selected to edit.";
+    unset($_SESSION['apptid']);
+    header("Location: bookings.php");
+    exit;
+}
+$book_id_to_edit = $_SESSION['edit_book_id'];
+$user_id = $_SESSION['user_id'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    try {
+        $new_date = $_POST["appt_date"];
+        $new_time = $_POST["appt_time"];
+        $new_staff_id = $_POST["staff"];
+        $tmp = $new_date . ' ' . $new_time;
+        $new_epoch_time = strtotime($tmp);
+        if ($new_epoch_time === false || $new_epoch_time < time()) {
+            $_SESSION['msg'] = "ERROR: Please select a valid date and time in the future.";
+        } else {
+            if (appt_update(dbconnect_insert(), $book_id_to_edit, $user_id, $new_staff_id, $new_epoch_time)) {
+                audit_write($user_id, 'BOOK_UPDATE', "User updated booking ID: $book_id_to_edit");
+                unset($_SESSION['edit_book_id']);
+                $_SESSION['msg'] = "SUCCESS: Your booking has been updated!";
+                header("location: bookings.php");
+                exit;
+            } else {
+                $_SESSION['msg'] = "ERROR: Booking update failed!";
+            }
+        }
+    } catch (Exception $e) {
+        $_SESSION['msg'] = "ERROR: " . $e->getMessage();
+    }
+    header("Location: alterbooking.php");
+    exit;
+}
+try {
+    $staff_list = staff_getter(dbconnect_insert());
+    $appt = appt_fetch(dbconnect_insert(), $book_id_to_edit, $user_id);
+    if (!$appt) {
+        unset($_SESSION['edit_book_id']);
+        $_SESSION['msg'] = "ERROR: Could not find that appointment.";
+        header("Location: bookings.php");
+        exit;
+    }
+    $appt_date_val = date('Y-m-d', $appt['appointment_date']);
+    $appt_time_val = date('H:i', $appt['appointment_date']);
+    $appt_staff_id = $appt['staff_id'];
+} catch (Exception $e) {
+    $staff_list = [];
+    $_SESSION['msg'] = "ERROR: Could not load data. " . $e->getMessage();
+}
+$message = user_message();
+echo "<!DOCTYPE html>";
+echo "<html>";
+echo "<head>";
+echo "    <title>Change Appointment - Primary Oaks</title>";
+echo "    <link rel='stylesheet' href='css/styles.css'>";
+echo "</head>";
+echo "<body>";
+require_once 'assets/topbar.php';
+require_once 'assets/nav.php';
+require_once 'assets/content.php';
+echo "<h1>Change Your Appointment</h1>";
+echo "<hr class='divider'>";
+echo $message;
+echo "<form action='alterbooking.php' method='POST'>";
+echo "    <label for='appt_date'>Appointment Date:</label><br>";
+echo "    <input type='date' id='appt_date' name='appt_date' value='" . htmlspecialchars($appt_date_val) . "' required><br><br>";
+echo "    <label for='appt_time'>Appointment Time:</label><br>";
+echo "    <input type='time' id='appt_time' name='appt_time' step='600' value='" . htmlspecialchars($appt_time_val) . "' required><br><br>";
+echo "    <label for='staff'>Select Clinician:</label><br>";
+echo "    <select id='staff' name='staff' required>";
+echo "        <option value=''>--Please select a staff member--</option>";
+foreach ($staff_list as $staff_member) {
+    if ($staff_member['role'] == "doc") { $role = "Doctor"; }
+    else if ($staff_member['role'] == "nur") { $role = "Nurse"; }
+    else { $role = "Clinician"; }
+    $selected = ($staff_member['staff_id'] == $appt_staff_id) ? 'selected' : '';
+    echo "        <option value='" . htmlspecialchars($staff_member['staff_id']) . "' " . $selected . ">";
+    echo "            " . htmlspecialchars($role . ' ' . $staff_member['first_name'] . ' ' . $staff_member['last_name'] . ' (Room ' . $staff_member['room'] . ')');
+    echo "        </option>";
+}
+echo "    </select><br><br>";
+echo "    <button type='submit'>Update Appointment</button>";
+echo "    <a href='bookings.php' class='cancel-link'>Cancel</a>";
+echo "</form>";
+echo "</div>";
+echo "</body>";
+echo "</html>";
+```
+===== END FILE: version_04\alterbooking.php =====
+
+===== BEGIN FILE: version_04\assets\common.php =====
+```php
+<?php
+/**
+ * assets/common.php
+ * Shared helpers used by multiple pages.
+ * Goal: make your app behave the SAME as his, not fancier.
+ * Notes:
+ *  - We match his database schema (table/column names) exactly.
+ *  - Where your pages expect nicer keys (e.g., first_name), we alias in SQL.
+ *  - We keep responsibilities the same and avoid unnecessary changes.
+ */
+
+/////////////////////////////
+// Session message helper //
+/////////////////////////////
+
+/**
+ * user_message()
+ * Reads a one-off message from $_SESSION["msg"], then clears it,
+ * and returns a small HTML snippet your pages can echo.
+ */
+function user_message() {
+    if (isset($_SESSION["msg"])) {                              // If a message was set earlier...
+        $message = $_SESSION["msg"];                            // ...capture it
+        unset($_SESSION["msg"]);                                // ...and clear it so it doesn't repeat
+        return "<div class='message'>{$message}</div>";         // ...return HTML the page can echo
+    }
+    return "";                                                  // No message => empty string
+}
+
+
+////////////////////////
+// AUDIT LOG WRITING //
+////////////////////////
+
+/**
+ * audit_write($userid, $code, $long_desc)
+ * Writes a single audit record to the `audit` table (his schema).
+ * Columns (per his SQL): auditid, date (DATETIME), userid (INT), code (TEXT), auditdescrip (TEXT)
+ * We keep your signature the same but map names correctly.
+ */
+function audit_write($userid, $code, $long_desc) {
+    require_once 'dbconn.php';                                  // Get the DB connector
+    try {
+        $conn = dbconnect_insert();                             // Open a write-capable connection
+
+        // Basic validation (same spirit as before, just clearer wording)
+        if (!is_numeric($userid) || $userid <= 0) {
+            throw new Exception("Audit user id is missing or invalid.");
+        }
+        if ($code === '' || $long_desc === '') {
+            throw new Exception("Audit code/description cannot be empty.");
+        }
+
+        // Match his schema exactly: table `audit`, columns: date, userid, code, auditdescrip
+        $sql = "INSERT INTO audit (`date`, `userid`, `code`, `auditdescrip`) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+
+        $date = date('Y-m-d H:i:s');                            // DATETIME string (his schema expects DATETIME)
+
+        $stmt->bindParam(1, $date,    PDO::PARAM_STR);          // Bind the formatted datetime
+        $stmt->bindParam(2, $userid,  PDO::PARAM_INT);          // Bind the user id
+        $stmt->bindParam(3, $code,    PDO::PARAM_STR);          // Bind the short code (e.g., REG, LGI, UPB)
+        $stmt->bindParam(4, $long_desc, PDO::PARAM_STR);        // Bind the long description
+
+        $stmt->execute();                                       // Write the row
+        $conn = null;                                           // Close connection
+        return true;                                            // Success
+    } catch (Exception $e) {
+        error_log("Audit Error: " . $e->getMessage());          // Log the reason (kept quiet to user)
+        return false;                                           // Signal failure to caller
+    }
+}
+
+
+//////////////////////////
+// STAFF LIST GETTER   //
+//////////////////////////
+
+/**
+ * staff_getter($conn)
+ * Returns all bookable staff (exclude admin), sorted like his.
+ * DB columns are: staffid, role, email, password, fname, sname, room
+ * Your pages expect keys: staff_id, role, first_name, last_name, room
+ * => We alias to preserve your page code (no HTML changes needed).
+ */
+function staff_getter($conn){
+    $sql = "SELECT 
+                staffid   AS staff_id,        -- alias to match your page code
+                role,
+                fname     AS first_name,      -- alias: fname -> first_name
+                sname     AS last_name,       -- alias: sname -> last_name
+                room
+            FROM staff
+            WHERE role != ?                   -- exclude admin role (not bookable)
+            ORDER BY role DESC";              // same ordering behavior as his
+    $stmt = $conn->prepare($sql);
+    $exclude_role = "adm";                     // admin role code in his schema
+    $stmt->bindParam(1, $exclude_role);
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $conn = null;                              // Close the connection (your style)
+    return $result;                            // Return the rows (empty array is fine)
+}
+
+
+/////////////////////////////////////
+// CREATE A NEW APPOINTMENT (BOOK) //
+/////////////////////////////////////
+
+/**
+ * commit_booking($conn, $epoch)
+ * Creates a new row in `book` using his columns:
+ *   userid, staffid, appointmentdate, bookedon, status
+ * Your form fields: $_POST["staff"] holds the staff id (in v04).
+ * We keep your behavior, just map columns correctly and set status 'BKD'.
+ */
+function commit_booking($conn, $epoch){
+    $sql = "INSERT INTO book (userid, staffid, appointmentdate, bookedon, status)
+            VALUES (?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(1, $_SESSION["user_id"]);                  // Logged-in user making the booking
+    $stmt->bindParam(2, $_POST["staff"]);                       // Staff to see
+    $stmt->bindParam(3, $epoch);                                // Appointment time (epoch)
+    $booked_on = time();                                        // When the booking was made
+    $stmt->bindParam(4, $booked_on);
+    $status = "BKD";                                            // Same status semantics as his
+    $stmt->bindParam(5, $status);
+    $stmt->execute();
+    $conn = null;
+    return true;
+}
+
+
+///////////////////////////////////////////////////////////
+// GET ALL BOOKINGS FOR THE CURRENT (LOGGED-IN) USER     //
+///////////////////////////////////////////////////////////
+
+/**
+ * appt_getter($conn)
+ * Returns upcoming bookings joined with staff info, same shape your pages use.
+ * We alias column names to what your HTML expects:
+ *   - book_id, appointment_date, booked_on, status
+ *   - role, first_name, last_name, room, staff_id
+ */
+function appt_getter($conn){
+    $sql = "SELECT 
+                b.bookid          AS book_id,           -- alias for page code
+                b.appointmentdate AS appointment_date,  -- alias epoch -> appointment_date
+                b.bookedon        AS booked_on,         -- alias epoch -> booked_on
+                b.status,
+                s.role,
+                s.fname           AS first_name,        -- alias
+                s.sname           AS last_name,         -- alias
+                s.room,
+                s.staffid         AS staff_id           -- alias
+            FROM book b 
+            JOIN staff s ON b.staffid = s.staffid 
+            WHERE b.userid = ?
+            ORDER BY b.appointmentdate ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(1, $_SESSION["user_id"]);
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $conn = null;
+    return $result ?: false;                                   // Keep your original truthy/false behavior
+}
+
+
+/////////////////////////////
+// CANCEL AN APPOINTMENT  //
+/////////////////////////////
+
+/**
+ * appt_cancel($conn, $book_id, $user_id)
+ * Deletes a booking **only if** it belongs to the current user (safety).
+ * (His version isn’t strict everywhere; we make it safe without changing UX.)
+ */
+function appt_cancel($conn, $book_id, $user_id) {
+    $sql = "DELETE FROM book WHERE bookid = ? AND userid = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(1, $book_id);
+    $stmt->bindParam(2, $user_id);
+    $stmt->execute();
+    $conn = null;
+    return true;
+}
+
+
+/////////////////////////////////////////////
+// FETCH A SINGLE APPOINTMENT (FOR EDIT)   //
+/////////////////////////////////////////////
+
+/**
+ * appt_fetch($conn, $book_id, $user_id)
+ * Returns one appointment row (only if owned by the user).
+ * Aliases columns so your edit form can prefill without changing HTML:
+ *   appointment_date (epoch), staff_id
+ */
+function appt_fetch($conn, $book_id, $user_id) {
+    $sql = "SELECT 
+                bookid            AS book_id,
+                userid,
+                staffid           AS staff_id,
+                appointmentdate   AS appointment_date,
+                bookedon          AS booked_on,
+                status
+            FROM book
+            WHERE bookid = ? AND userid = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(1, $book_id);
+    $stmt->bindParam(2, $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $conn = null;
+    return $result ?: false;                                    // Exactly your contract
+}
+
+
+///////////////////////////////////////
+// UPDATE AN EXISTING APPOINTMENT    //
+///////////////////////////////////////
+
+/**
+ * appt_update($conn, $book_id, $user_id, $staff_id, $epoch_time)
+ * Updates the clinician and time for one appointment if the booking is owned by the user.
+ * Matches your v04/alterbooking.php call signature.
+ */
+function appt_update($conn, $book_id, $user_id, $staff_id, $epoch_time) {
+    $sql = "UPDATE book 
+            SET staffid = ?, appointmentdate = ?
+            WHERE bookid = ? AND userid = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(1, $staff_id);
+    $stmt->bindParam(2, $epoch_time);
+    $stmt->bindParam(3, $book_id);
+    $stmt->bindParam(4, $user_id);
+    $stmt->execute();
+    $conn = null;
+    return true;
+}
+
+?>
+
+```
+===== END FILE: version_04\assets\common.php =====
+
+===== BEGIN FILE: version_04\assets\content.php =====
+```php
+<?php
+
+echo "<div class='content'>";
+echo "<h2></h2>";
+
+?>
+```
+===== END FILE: version_04\assets\content.php =====
+
+===== BEGIN FILE: version_04\assets\dbconn.php =====
+```php
+<?php
+/**
+ * assets/dbconn.php
+ * Central PDO connector. Matches his DB name and keeps behavior simple.
+ * No echoes here (library file). Clean, reliable, and identical for read/write.
+ */
+
+function dbconnect_read() {
+    // Connect for SELECTs (same settings as write; separated for clarity)
+    return _dbconnect_core();
+}
+
+function dbconnect_insert() {
+    // Connect for INSERT/UPDATE/DELETE
+    return _dbconnect_core();
+}
+
+function _dbconnect_core() {
+    // --- Adjust only if your credentials differ ---
+    $host    = 'localhost';         // DB host
+    $dbname  = 'primaryoaks';       // IMPORTANT: matches his schema name
+    $user    = 'root';              // Your MySQL username
+    $pass    = '';                  // Your MySQL password (if any)
+    $charset = 'utf8mb4';           // Safe default charset
+
+    // PDO DSN string (MySQL)
+    $dsn = "mysql:host={$host};dbname={$dbname};charset={$charset}";
+
+    // PDO options for consistent, safe behavior
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Throw exceptions on errors
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Return rows as assoc arrays
+        PDO::ATTR_EMULATE_PREPARES   => false,                  // Use native prepares when possible
+    ];
+
+    // Create and return the PDO instance
+    return new PDO($dsn, $user, $pass, $options);
+}
+
+```
+===== END FILE: version_04\assets\dbconn.php =====
+
+===== BEGIN FILE: version_04\assets\nav.php =====
+```php
+<?php
+// assets/nav.php
+// This file outputs the navigation bar HTML structure.
+// It should be included using require_once.
+// It checks the session to decide whether to show Logout.
+
+// Ensure session is started if not already (good practice in included files that might use sessions)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+<nav>
+    <ul>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="register.php">Register</a></li>
+        <li><a href="login.php">Login</a></li>
+        <!-- Conditionally show Logout link if user is logged in -->
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <li><a href="book.php">Book</a></li>
+            <li><a href="bookings.php">Bookings</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        <?php endif; ?>
+        <!-- Add other navigation links as needed for future features -->
+        <!-- <li><a href="book.php">Book</a></li> -->
+        <!-- <li><a href="bookings.php">Bookings</a></li> -->
+    </ul>
+</nav>
+```
+===== END FILE: version_04\assets\nav.php =====
+
+===== BEGIN FILE: version_04\assets\staff_common.php =====
+```php
+<?php
+// assets/staff_common.php
+// This file contains functions specifically for staff management.
+
+/**
+ * Displays and clears a session message.
+ * We add this here so staff pages don't need to include the user 'common.php'
+ */
+function user_message() {
+    if (isset($_SESSION["msg"])) {
+        $message = $_SESSION["msg"];
+        unset($_SESSION["msg"]);
+        return "<div class='message'>{$message}</div>";
+    }
+    return "";
+}
+
+/**
+ * Inserts a new staff member into the database.
+ * Matches the columns in your 'staff' table.
+ */
+function staffreg_user($conn) {
+    // SQL uses the columns from your primary_oaks.sql file
+    $sql = "INSERT INTO staff (role, first_name, last_name, room) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+
+    // Bind parameters from the POST data
+    $stmt->bindParam(1, $_POST['role']);
+    $stmt->bindParam(2, $_POST['first_name']);
+    $stmt->bindParam(3, $_POST['last_name']);
+    $stmt->bindParam(4, $_POST['room']);
+
+    $stmt->execute();
+
+    // Get the ID of the new staff member we just created
+    $new_staff_id = $conn->lastInsertId();
+
+    $conn = null;
+    return $new_staff_id; // Return the new ID so we can audit it
+}
+
+/**
+ * Logs an action to the 'staff_audits' table.
+ * Matches your 'staff_common.php' and database schema.
+ */
+function staff_auditor($conn, $staffid, $code, $long_desc) {
+    try {
+        if (!is_numeric($staffid) || $staffid <= 0 || empty($code) || empty($long_desc)) {
+            throw new Exception("Staff audit data missing or invalid.");
+        }
+
+        // SQL matches your 'staff_audits' table
+        $sql = "INSERT INTO staff_audits (staff_id, date, code, long_desc) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+
+        $date = date('Y-m-d H:i:s'); // Use full datetime
+
+        $stmt->bindParam(1, $staffid);
+        $stmt->bindParam(2, $date);
+        $stmt->bindParam(3, $code);
+        $stmt->bindParam(4, $long_desc);
+
+        $stmt->execute();
+        $conn = null;
+        return true;
+
+    } catch (Exception $e) {
+        error_log("Staff Audit Error: " . $e->getMessage());
+        return false;
+    }
+}
+?>
+```
+===== END FILE: version_04\assets\staff_common.php =====
+
+===== BEGIN FILE: version_04\assets\topbar.php =====
+```php
+<?php
+/*This is for the topbar.*/
+
+echo '<div class="topbar">';
+echo '<h1>Primary Oaks Surgery</h1>';
+echo '</div>';
+
+?>
+```
+===== END FILE: version_04\assets\topbar.php =====
+
+===== BEGIN FILE: version_04\book.php =====
+```php
+<?php
+session_start();
+require_once "assets/common.php";
+require_once "assets/dbconn.php";
+
+// 1. Check if user is logged in. If not, redirect to login.
+if (!isset($_SESSION['user_id'])) {
+    // We'll use the 'msg' session variable for error messages
+    $_SESSION['msg'] = "You must log in to book an appointment.";
+    header("Location: login.php");
+    exit;
+}
+
+// 2. Handle form submission (POST request)
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    try {
+        // Combine date and time from form
+        $tmp = $_POST["appt_date"] . ' ' . $_POST["appt_time"];
+        // Convert to epoch timestamp
+        $epoch_time = strtotime($tmp);
+
+        // Check if a valid time was created and is in the future
+        if ($epoch_time === false || $epoch_time < time()) {
+            $_SESSION['msg'] = "ERROR: Please select a valid date and time in the future.";
+        } else {
+            // Call the (now fixed) commit_booking function
+            if (commit_booking(dbconnect_insert(), $epoch_time)) {
+                // Set a success message and redirect to bookings page
+                $_SESSION['msg'] = "SUCCESS: Your booking has been made!";
+                header("location: bookings.php"); // Go to bookings page to see it
+                exit;
+            } else {
+                $_SESSION['msg'] = "ERROR: Booking has failed!";
+            }
+        }
+    } catch (PDOException $e) {
+        $_SESSION['msg'] = "ERROR: Database error. " . $e->getMessage();
+    } catch (Exception $e) {
+        $_SESSION['msg'] = "ERROR: " . $e->getMessage();
+    }
+
+    // If we are here, something failed. Redirect back to book.php to show the error.
+    header("location: book.php");
+    exit;
+}
+
+// 3. (GET Request) Prepare data for displaying the page
+try {
+    // Get the list of staff to populate the dropdown
+    $staff_list = staff_getter(dbconnect_insert());
+} catch (Exception $e) {
+    // If the database fails, set staff list to empty and show an error
+    $staff_list = [];
+    $_SESSION['msg'] = "ERROR: Could not load staff. " . $e->getMessage();
+}
+
+// Get any session messages to display (e.g., from a failed booking)
+$message = user_message(); // This function also clears the message
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Appointment - Primary Oaks</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Include standard layout files -->
+<?php require_once 'assets/topbar.php'; ?>
+<?php require_once 'assets/nav.php'; ?>
+<?php require_once 'assets/content.php'; ?>
+
+<h1>Book an Appointment</h1>
+<hr>
+
+<!-- Display any error/success messages here -->
+<?php echo $message; ?>
+
+<!-- This is the booking form. It was missing before. -->
+<form action="book.php" method="POST">
+
+    <label for="appt_date">Appointment Date:</label><br>
+    <input type="date" id="appt_date" name="appt_date" required><br><br>
+
+    <label for="appt_time">Appointment Time:</label><br>
+    <!-- step="600" means 10-minute intervals, matching your original code -->
+    <input type="time" id="appt_time" name="appt_time" step="600" required><br><br>
+
+    <label for="staff">Select Clinician:</label><br>
+    <select id="staff" name="staff" required>
+        <option value="">--Please select a staff member--</option>
+        <?php foreach ($staff_list as $staff_member): ?>
+            <?php
+            // 3. FIXED: Use comparison (==) not assignment (=)
+            if ($staff_member['role'] == "doc") {
+                $role = "Doctor";
+            } else if ($staff_member['role'] == "nur") {
+                $role = "Nurse";
+            } else {
+                $role = "Clinician"; // Fallback
+            }
+            ?>
+            <!-- We are creating an <option> for the dropdown list -->
+            <option value="<?php echo htmlspecialchars($staff_member['staff_id']); ?>">
+                <?php echo htmlspecialchars($role . ' ' . $staff_member['first_name'] . ' ' . $staff_member['last_name'] . ' (Room ' . $staff_member['room'] . ')'); ?>
+            </option>
+        <?php endforeach; ?>
+    </select><br><br>
+
+    <button type="submit">Book Appointment</button>
+</form>
+
+</div> <!-- Closes the content div from content.php -->
+
+</body>
+</html>
+```
+===== END FILE: version_04\book.php =====
+
+===== BEGIN FILE: version_04\bookings.php =====
+```php
+<?php
+session_start();
+require_once 'assets/common.php';
+require_once 'assets/dbconn.php';
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['msg'] = "You must log in first to see your bookings.";
+    header("Location: login.php");
+    exit;
+}
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $book_id = $_POST['book_id'] ?? 0;
+    $user_id = $_SESSION['user_id'];
+    $action = $_POST['action'] ?? '';
+    try {
+        if ($action == 'delete' && $book_id > 0) {
+            appt_cancel(dbconnect_insert(), $book_id, $user_id);
+            audit_write($user_id, 'BOOK_CANCEL', "User cancelled booking ID: $book_id");
+            $_SESSION['msg'] = "SUCCESS: Your appointment has been cancelled.";
+        } elseif ($action == 'change' && $book_id > 0) {
+            $_SESSION['edit_book_id'] = $book_id;
+            header("Location: alterbooking.php");
+            exit;
+        }
+    } catch (Exception $e) {
+        $_SESSION['msg'] = "ERROR: " . $e->getMessage();
+    }
+    header("Location: bookings.php");
+    exit;
+}
+$message = user_message();
+try {
+    $appts = appt_getter(dbconnect_insert());
+} catch (Exception $e) {
+    $appts = false;
+    $_SESSION['msg'] = "ERROR: Could not load appointments. " . $e->getMessage();
+    $message = user_message();
+}
+echo "<!DOCTYPE html>";
+echo "<html>";
+echo "<head>";
+echo "    <title>My Bookings - Primary Oaks</title>";
+echo "    <link rel='stylesheet' href='css/styles.css'>";
+echo "</head>";
+echo "<body>";
+require_once 'assets/topbar.php';
+require_once 'assets/nav.php';
+require_once 'assets/content.php';
+echo "<h1>My Bookings</h1>";
+echo "<hr class='divider'>";
+echo $message;
+echo "<p class='content'>Below are your upcoming appointments.</p>";
+if (!$appts) {
+    echo "<p>You have no appointments booked.</p>";
+} else {
+    echo "<table class='appointment-table'>";
+    echo "    <thead>";
+    echo "    <tr>";
+    echo "        <th>Appointment Date</th>";
+    echo "        <th>Clinician</th>";
+    echo "        <th>Room</th>";
+    echo "        <th class='action-cell'>Actions</th>";
+    echo "    </tr>";
+    echo "    </thead>";
+    echo "    <tbody>";
+    foreach ($appts as $appt) {
+        if ($appt['role'] == "doc") { $role = "Doctor"; }
+        else if ($appt['role'] == "nur") { $role = "Nurse"; }
+        else { $role = "Clinician"; }
+        echo "        <tr>";
+        echo "            <form action='bookings.php' method='POST'>";
+        echo "                <td>" . date('M d, Y @ h:i A', $appt['appointment_date']) . "</td>";
+        echo "                <td>" . htmlspecialchars($role . " " . $appt['first_name'] . " " . $appt['last_name']) . "</td>";
+        echo "                <td>" . htmlspecialchars($appt['room']) . "</td>";
+        echo "                <td class='action-cell'>";
+        echo "                    <input type='hidden' name='book_id' value='" . $appt['book_id'] . "'>";
+        echo "                    <button type='submit' name='action' value='change' class='action-btn btn-change'>Change</button>";
+        echo "                    <button type='submit' name='action' value='delete' class='action-btn btn-delete' onclick='return confirm(\"Are you sure you want to cancel this appointment?\");'>Cancel</button>";
+        echo "                </td>";
+        echo "            </form>";
+        echo "        </tr>";
+    }
+    echo "    </tbody>";
+    echo "</table>";
+}
+echo "</div>";
+echo "</body>";
+echo "</html>";
+```
+===== END FILE: version_04\bookings.php =====
+
+===== BEGIN FILE: version_04\css\styles.css =====
+```css
+/* === Global === */
+body {
+    background-color: #2e4a3d; /* Dark Forest Green - main background color */
+    margin: 0;
+    font-family: sans-serif;
+    color: #ffffff; /* Default text color - white for readability on dark background */
+}
+
+/* --- Top Header Bar --- */
+.topbar {
+    width: 100%;
+    background-color: #243a30; /* Slightly lighter dark green for header */
+    padding: 15px 0;
+    text-align: center;
+}
+
+.topbar h1 {
+    color: #ffffff; /* White text for header title */
+    margin: 0;
+    font-size: 2em;
+}
+
+/* --- Navigation Bar --- */
+nav ul {
+    list-style-type: none; /* Remove bullet points from navigation */
+    margin: 0;
+    padding: 0;
+    display: flex; /* Make navigation items display horizontally */
+    justify-content: flex-start; /* Align items to the left */
+    background-color: #059669; /* Calming green background for nav bar */
+    width: 100%;
+}
+
+nav li {
+    padding: 10px 20px; /* Space around each navigation item */
+}
+
+nav li a {
+    color: #ffffff; /* White text on green background - good contrast */
+    text-decoration: none; /* Remove underline from links */
+    font-size: 1.1em; /* Slightly larger text for readability */
+    display: inline-block; /* Make links behave like block elements */
+}
+
+nav li a:hover,
+nav li a:focus,
+nav li a:focus-visible {
+    background-color: #047857; /* Darker green on hover/focus for visual feedback */
+    text-decoration: underline; /* Add underline on hover for accessibility */
+    outline: 2px solid #ffffff; /* White outline for focus visibility */
+    outline-offset: 2px; /* Space between outline and element */
+}
+
+nav li a:active {
+    background-color: #065f46; /* Even darker green when link is clicked */
+}
+
+/* --- Content Area --- */
+.content {
+    padding: 20px; /* Space around content */
+    max-width: 1000px; /* Maximum width for content container */
+    margin: 0 auto; /* Center content horizontally */
+    width: 90%; /* Width of content area */
+}
+
+.content p {
+    margin-bottom: 20px; /* Space between paragraphs */
+    line-height: 1.5; /* Better readability with line spacing */
+}
+
+/* --- Portal Links (Register/Login) --- */
+.portal-links {
+    margin: 20px 0; /* Space around portal links section */
+}
+
+.portal-links a {
+    color: #d1fae5; /* Light green/teal - good contrast on dark background */
+    text-decoration: none; /* Remove default underline */
+    display: block; /* Make links full width */
+    margin-bottom: 5px; /* Space between links */
+    font-weight: bold; /* Bold text for emphasis */
+    font-size: 1em; /* Standard font size */
+    padding: 8px 15px; /* Padding inside links */
+    background-color: #047857; /* Dark green background for links */
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth color transition */
+}
+
+.portal-links a:hover {
+    background-color: #065f46; /* Darker green on hover */
+    text-decoration: underline; /* Underline on hover for feedback */
+}
+
+.portal-links a:focus,
+.portal-links a:focus-visible {
+    outline: 2px solid #d1fae5; /* Light green outline for focus */
+    outline-offset: 2px; /* Space between outline and element */
+    text-decoration: underline; /* Underline on focus for accessibility */
+}
+
+.portal-links a:active {
+    color: #ffffff; /* White text when link is active */
+    background-color: #036d4f; /* Even darker green when clicked */
+}
+
+/* --- General Focus Styles --- */
+:focus {
+    scroll-margin: 100px; /* Space for fixed headers when focusing elements */
+}
+
+:focus-visible {
+    outline: 2px solid #ffffff; /* White outline for focused elements */
+    outline-offset: 2px; /* Space between outline and element */
+}
+
+/* --- Feedback Message Styles --- */
+.feedback-success,
+#usermessage {
+    color: #10b981; /* Green text for success messages */
+    font-weight: bold;
+    padding: 10px 15px; /* Padding inside message box */
+    border: 1px solid #10b981; /* Green border */
+    background-color: #0c4a35; /* Dark green background */
+    margin-bottom: 10px; /* Space below message */
+    border-radius: 4px; /* Rounded corners */
+}
+
+.feedback-error,
+#usererror {
+    color: #ef4444; /* Red text for error messages */
+    padding: 10px 15px; /* Padding inside message box */
+    border: 1px solid #ef4444; /* Red border */
+    background-color: #450a0a; /* Dark red background */
+    margin-bottom: 10px; /* Space below message */
+    border-radius: 4px; /* Rounded corners */
+}
+
+/* --- Form Elements --- */
+form {
+    margin: 20px 0; /* Space around forms */
+}
+
+label {
+    display: block; /* Make labels full width */
+    margin-bottom: 5px; /* Space below labels */
+    font-weight: bold; /* Bold text for labels */
+    color: #d1fae5; /* Light green text for better readability */
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="tel"],
+input[type="number"],
+select {
+    width: 100%; /* Full width inputs */
+    padding: 10px; /* Padding inside inputs */
+    margin-bottom: 15px; /* Space below inputs */
+    border: 1px solid #3b82f6; /* Blue border for inputs */
+    border-radius: 4px; /* Rounded corners */
+    background-color: #1e3a2d; /* Dark green background for inputs */
+    color: #ffffff; /* White text */
+    font-size: 16px; /* Readable font size */
+}
+
+input[type="submit"],
+button {
+    background-color: #059669; /* Green background for buttons */
+    color: white; /* White text */
+    border: none; /* No border */
+    padding: 10px 20px; /* Padding inside buttons */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 16px; /* Readable font size */
+    font-weight: bold; /* Bold text */
+    transition: background-color 0.3s ease; /* Smooth color transition */
+    margin: 5px 0; /* Space around buttons */
+}
+
+input[type="submit"]:hover,
+button:hover {
+    background-color: #047857; /* Darker green on hover */
+}
+
+input[type="submit"]:active,
+button:active {
+    background-color: #065f46; /* Even darker green when clicked */
+}
+
+/* --- Tables --- */
+#bookings {
+    width: 100%; /* Full width table */
+    border-collapse: collapse; /* Merge table borders */
+    margin: 20px 0; /* Space around table */
+    background-color: #1e3a2d; /* Dark green background */
+    border-radius: 8px; /* Rounded corners for table */
+    overflow: hidden; /* Hide overflow for rounded corners */
+}
+
+#bookings th,
+#bookings td {
+    padding: 12px 15px; /* Padding inside table cells */
+    text-align: left; /* Left-align text */
+    border: 1px solid #2e4a3d; /* Border color matching background */
+    color: #ffffff; /* White text */
+}
+
+#bookings th {
+    background-color: #047857; /* Darker green for header cells */
+    font-weight: bold; /* Bold text for headers */
+    text-transform: uppercase; /* Uppercase text for headers */
+    font-size: 0.9em; /* Slightly smaller font for headers */
+}
+
+#bookings tr:nth-child(even) {
+    background-color: #243a30; /* Slightly lighter green for even rows */
+}
+
+#bookings tr:hover {
+    background-color: #059669; /* Green highlight on row hover */
+}
+
+/* --- Action Buttons --- */
+.action-btn {
+    padding: 5px 10px; /* Padding inside action buttons */
+    margin: 2px; /* Space around buttons */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    color: white; /* White text */
+    font-weight: bold; /* Bold text */
+    transition: background-color 0.2s ease; /* Smooth color transition */
+}
+
+.btn-delete {
+    background-color: #dc2626; /* Red background for delete buttons */
+}
+
+.btn-delete:hover {
+    background-color: #b91c1c; /* Darker red on hover */
+}
+
+.btn-change {
+    background-color: #059669; /* Green background for change buttons */
+}
+
+.btn-change:hover {
+    background-color: #047857; /* Darker green on hover */
+}
+
+/* --- Password Requirements List --- */
+.rules {
+    margin: 20px 0; /* Space around rules list */
+    padding-left: 20px; /* Indentation for list */
+}
+
+.rules li {
+    color: #d1fae5; /* Light green/teal text */
+    font-size: 0.9em; /* Slightly smaller font */
+    margin-bottom: 5px; /* Space between list items */
+    line-height: 1.4; /* Better readability */
+}
+
+/* --- Messages Container --- */
+.message {
+    padding: 10px; /* Padding inside message box */
+    margin: 10px 0; /* Space around messages */
+    border-radius: 4px; /* Rounded corners */
+}
+
+.message-success {
+    background-color: #0c4a35; /* Dark green background */
+    border: 1px solid #10b981; /* Green border */
+    color: #10b981; /* Green text */
+}
+
+.message-error {
+    background-color: #450a0a; /* Dark red background */
+    border: 1px solid #ef4444; /* Red border */
+    color: #ef4444; /* Red text */
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column; /* Stack navigation items vertically on small screens */
+    }
+
+    nav li {
+        padding: 8px 15px; /* Smaller padding on mobile */
+    }
+
+    .content {
+        width: 95%; /* Wider content on mobile */
+        padding: 15px; /* Smaller padding on mobile */
+    }
+}
+
+/* === Bookings Table Styling === */
+.appointment-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background-color: #1e3a2d;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.appointment-table thead {
+    background-color: #047857;
+}
+
+.appointment-table th,
+.appointment-table td {
+    padding: 12px 15px;
+    border: 1px solid #2e4a3d;
+    color: #ffffff;
+    text-align: left;
+}
+
+.appointment-table th {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.appointment-table td {
+    vertical-align: middle;
+}
+
+.appointment-table tr:nth-child(even) {
+    background-color: #243a30;
+}
+
+.appointment-table tr:hover {
+    background-color: #059669;
+}
+
+.action-cell {
+    text-align: center;
+    padding: 8px !important;
+}
+
+.divider {
+    border: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #059669, transparent);
+    margin: 20px 0;
+    width: 100%;
+}
+
+/* Action buttons are already styled in your existing CSS */
+
+.cancel-link {
+    margin-left: 10px;
+    color: #d1fae5;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.cancel-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+```
+===== END FILE: version_04\css\styles.css =====
+
+===== BEGIN FILE: version_04\index.php =====
+```php
+<?php // This open the php code section
+
+// Check if a message is passed via the URL, otherwise start session
+if (!isset($_GET['message'])) {
+    session_start();
+    $message = false; // Flag to indicate no message from URL
+} else {
+    // Decode and sanitize the message from the URL
+    $message = htmlspecialchars(urldecode($_GET['message']), ENT_QUOTES, 'UTF-8');
+}
+
+// Include common functions (like user_message)
+require_once "assets/common.php";
+
+// Start generating the HTML output
+echo "<!DOCTYPE html>"; // Essential HTML declaration
+echo "<html>"; // Open the HTML tag
+echo "<head>"; // Open the head section
+echo "<title> Version 5</title>"; // Set the page title
+echo "<link rel='stylesheet' href='css/styles.css'>"; // Link to the external CSS file
+echo "</head>"; // Close the head section
+echo "<body>"; // Open the body section
+
+// Include the top bar and navigation bar
+require_once "assets/topbar.php"; // Brings in the top bar (branding, login status, etc.)
+require_once "assets/nav.php"; // Brings in the main navigation menu
+
+// Open the main content area div
+echo "<div class='content'>";
+echo "<br>"; // Add a line break
+echo "<h2> Welcome to Primary Oaks - Your Health is our Concern</h2>"; // Welcome heading
+echo "<p class='content'> Make appointments fast and easy. </p>"; // Informational text
+echo "<p class='content'> You have to be registered to login and book </p>"; // Registration info
+echo "<br>"; // Add another line break
+
+// Display the message from the URL (if it existed) or the session message
+if ($message) {
+    // If a message came from the URL, display it directly
+    echo "<div class='message'>". $message . "</div>";
+} else {
+    // Otherwise, check for and display a message stored in the session using the common function
+    echo user_message(); // This function also clears the session message after displaying it
+}
+
+// Close the content div and the body/html tags
+echo "</div>"; // Close the content div
+echo "</body>"; // Close the body section
+echo "</html>"; // Close the HTML section
+
+?>
+```
+===== END FILE: version_04\index.php =====
+
+===== BEGIN FILE: version_04\login.php =====
+```php
+<?php
+session_start();
+require_once 'assets/dbconn.php';
+require_once 'assets/common.php';
+
+$feedback = ""; // To store error messages
+$email_preset = ""; // To re-fill the email field on a failed attempt
+
+// --- 1. Check if user is ALREADY logged in ---
+// If they are, just send them to the index page.
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+// --- 2. Check if the form has been submitted ---
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // Log that an attempt was made
+    audit_write(0, 'LOGIN_ATTEMPT', 'Login attempt initiated from IP: ' . $_SERVER['REMOTE_ADDR']);
+
+    // Get and sanitize email and password
+    $email = trim(filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL));
+    $password = filter_input(INPUT_POST, "password", FILTER_UNSAFE_RAW);
+    $email_preset = htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); // For re-filling the form
+
+    // Check for empty fields
+    if (empty($email) || empty($password)) {
+        $feedback = "Login failed. Please check your details and try again.";
+        audit_write(0, 'LOGIN_FAILED', 'Login failed for email ' . $email . ' - Empty fields provided. IP: ' . $_SERVER['REMOTE_ADDR']);
+    } else {
+        // Try to find and verify the user
+        try {
+            $pdo = dbconnect_insert();
+
+            // Get user data from the database
+            $stmt = $pdo->prepare("SELECT user_id, first_name, last_name, password_hash FROM users WHERE email_address = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Verify the user exists AND the password is correct
+            if ($user && password_verify($password, $user['password_hash'])) {
+
+                // --- SUCCESS! ---
+                // Set session variables
+                $_SESSION['user_id'] = $user['user_id'];
+                // We'll store their name for a nice welcome message
+                $_SESSION['user_name'] = htmlspecialchars($user['first_name'] . ' ' . $user['last_name'], ENT_QUOTES, 'UTF-8');
+
+                // Log the successful login
+                audit_write($user['user_id'], 'LOGIN_SUCCESS', 'User logged in successfully with email: ' . $email);
+
+                // FIXED: Redirect to the index page on success
+                header("Location: index.php");
+                exit(); // Stop the script
+
+            } else {
+                // --- FAILURE ---
+                // Log the failure (generic reason for security)
+                $user_id_for_audit = $user['user_id'] ?? 0;
+                $reason = $user ? 'Incorrect password' : 'Email not found';
+                audit_write($user_id_for_audit, 'LOGIN_FAILED', 'Login failed for email ' . $email . ' - ' . $reason . '. IP: ' . $_SERVER['REMOTE_ADDR']);
+
+                // Show generic error message
+                $feedback = "Login failed. Please check your details and try again.";
+            }
+        } catch (Exception $e) {
+            // Database or other system error
+            audit_write(0, 'LOGIN_FAILED', 'Login failed for email ' . $email . ' due to a database error. Error: ' . $e->getMessage() . '. IP: ' . $_SERVER['REMOTE_ADDR']);
+            $feedback = "An unexpected error occurred. Please try again.";
+        }
+    }
+}
+
+// --- 3. Check for any success messages from registration ---
+// This uses the function from common.php
+$message = user_message();
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Primary Oaks Surgery</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<?php require_once 'assets/topbar.php'; ?>
+<?php require_once 'assets/nav.php'; ?>
+<?php require_once 'assets/content.php'; ?>
+
+<h1>Login to Your Account</h1>
+<hr>
+
+<!--
+    This logic now displays:
+    1. A success message (if you just registered).
+    2. An error message (if login failed).
+-->
+<?php if (!empty($message)): // This is for success messages (e.g., from register.php) ?>
+    <div class="feedback-success"><?= $message ?></div><br>
+<?php elseif (!empty($feedback)): // This is for login error messages ?>
+    <div class="feedback-error"><strong>❌ Error:</strong> <?= $feedback ?></div><br>
+<?php endif; ?>
+
+<!--
+    The form now pre-fills the email address on a failed attempt
+    to make it easier to re-try.
+-->
+<form action="login.php" method="POST">
+    <label for="email">Email Address:</label><br>
+    <input type="email" id="email" name="email" value="<?= $email_preset ?>" required><br><br>
+
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <button type="submit">Login</button>
+</form>
+<br>
+<p>Don't have an account? <a href="register.php">Register here</a>.</p>
+
+</div> <!-- Closes the content div -->
+</body>
+</html>
+```
+===== END FILE: version_04\login.php =====
+
+===== BEGIN FILE: version_04\logout.php =====
+```php
+<?php
+session_start();
+$user_id_to_log = $_SESSION['user_id'] ?? 0;
+require_once 'assets/common.php';
+
+if ($user_id_to_log > 0) {
+    audit_write($user_id_to_log, 'LOGOUT', 'User logged out successfully. IP: ' . $_SERVER['REMOTE_ADDR']);
+} else {
+    audit_write(0, 'LOGOUT_FAILED', 'Logout attempt made without active session. IP: ' . $_SERVER['REMOTE_ADDR']);
+}
+
+$_SESSION = array();
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+session_destroy();
+header("Location: index.php");
+exit();
+?>
+```
+===== END FILE: version_04\logout.php =====
+
+===== BEGIN FILE: version_04\register.php =====
+```php
+<?php
+session_start();
+require_once 'assets/dbconn.php';
+require_once 'assets/common.php';
+$feedback = "";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    audit_write(0, 'REG_ATTEMPT', 'Registration attempt initiated from IP: ' . $_SERVER['REMOTE_ADDR']);
+    $email_raw = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
+    $password_raw = filter_input(INPUT_POST, "password", FILTER_UNSAFE_RAW);
+    $confirmPassword_raw = filter_input(INPUT_POST, "confirmPassword", FILTER_UNSAFE_RAW);
+    $first_name_raw = filter_input(INPUT_POST, "first_name", FILTER_UNSAFE_RAW);
+    $last_name_raw = filter_input(INPUT_POST, "last_name", FILTER_UNSAFE_RAW);
+    $dob_raw = filter_input(INPUT_POST, "date_of_birth", FILTER_UNSAFE_RAW);
+    $phone_raw = filter_input(INPUT_POST, "phone_number", FILTER_UNSAFE_RAW);
+    $addr1_raw = filter_input(INPUT_POST, "address_line_1", FILTER_UNSAFE_RAW);
+    $addr2_raw = filter_input(INPUT_POST, "address_line_2", FILTER_UNSAFE_RAW);
+    $postcode_raw = filter_input(INPUT_POST, "postcode", FILTER_UNSAFE_RAW);
+    $county_raw = filter_input(INPUT_POST, "county", FILTER_UNSAFE_RAW);
+    $email = trim($email_raw);
+    $first_name = trim($first_name_raw);
+    $last_name = trim($last_name_raw);
+    $date_of_birth = trim($dob_raw);
+    $phone_number = trim($phone_raw);
+    $address_line_1 = trim($addr1_raw);
+    $address_line_2 = trim($addr2_raw);
+    $postcode = trim($postcode_raw);
+    $county = trim($county_raw);
+    if (empty($email) || empty($password_raw) || empty($first_name) || empty($last_name) || empty($date_of_birth) || empty($phone_number) || empty($address_line_1) || empty($postcode) || empty($county)) {
+        $feedback .= "All fields (except Address Line 2) are required.<br>";
+    }
+    if ($password_raw !== $confirmPassword_raw) {
+        $feedback .= "Passwords do not match.<br>";
+    }
+    if (empty($feedback) && !empty($password_raw)) {
+        if (stripos($password_raw, 'password') !== false) {
+            $feedback .= "Password cannot contain the word 'password'.<br>";
+        }
+        if (strlen($password_raw) < 9) {
+            $feedback .= "Password must be greater than 8 characters.<br>";
+        }
+        if (!preg_match('/[A-Z]/', $password_raw)) {
+            $feedback .= "Password must contain at least one uppercase letter.<br>";
+        }
+        if (!preg_match('/[a-z]/', $password_raw)) {
+            $feedback .= "Password must contain at least one lowercase letter.<br>";
+        }
+        if (!preg_match('/[0-9]/', $password_raw)) {
+            $feedback .= "Password must contain at least one number.<br>";
+        }
+        if (!preg_match('/[^a-zA-Z0-9]/', $password_raw)) {
+            $feedback .= "Password must contain at least one special character.<br>";
+        }
+        if (isset($password_raw[0])) {
+            if (is_numeric($password_raw[0])) {
+                $feedback .= "First character cannot be a number.<br>";
+            } elseif (!ctype_alnum($password_raw[0])) {
+                $feedback .= "First character cannot be a special character.<br>";
+            }
+        }
+        $len = strlen($password_raw);
+        if ($len > 0 && !ctype_alnum($password_raw[$len - 1])) {
+            $feedback .= "Last character cannot be a special character.<br>";
+        }
+    }
+    if (empty($feedback)) {
+        try {
+            $pdo = dbconnect_insert();
+            $stmt = $pdo->prepare("SELECT user_id FROM users WHERE email_address = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                audit_write(0, 'REG_FAILED', 'Registration failed for email ' . $email . ' - Email already exists. IP: ' . $_SERVER['REMOTE_ADDR']);
+                $feedback = "Registration failed. Please try again.";
+            } else {
+                $password_hash = password_hash($password_raw, PASSWORD_BCRYPT);
+                $sql = "INSERT INTO users (
+                            email_address, password_hash, first_name, last_name, 
+                            date_of_birth, phone_number, address_line_1, address_line_2, 
+                            postcode, county
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                        $email, $password_hash, $first_name, $last_name,
+                        $date_of_birth, $phone_number, $address_line_1, $address_line_2,
+                        $postcode, $county
+                ]);
+                $new_user_id = $pdo->lastInsertId();
+                audit_write($new_user_id, 'REG_SUCCESS', 'New user registered successfully with email: ' . $email . '. Name: ' . $first_name . ' ' . $last_name);
+                $_SESSION['msg'] = "✅ Registration successful! You can now log in.";
+                header("Location: login.php");
+                exit();
+            }
+        } catch (Exception $e) {
+            audit_write(0, 'REG_FAILED', 'Registration failed due to a database error for email ' . $email . '. Error: ' . $e->getMessage() . '. IP: ' . $_SERVER['REMOTE_ADDR']);
+            $feedback = "An unexpected error occurred. Please try again.";
+        }
+    } else {
+        audit_write(0, 'REG_FAILED', 'Registration failed for email ' . $email . ' - Validation errors: ' . str_replace('<br>', ' ', $feedback) . '. IP: ' . $_SERVER['REMOTE_ADDR']);
+    }
+}
+echo "<!DOCTYPE html>";
+echo "<html>";
+echo "<head>";
+echo "    <title>Register - Primary Oaks Surgery</title>";
+echo "    <link rel='stylesheet' href='css/styles.css'>";
+echo "</head>";
+echo "<body>";
+require_once 'assets/topbar.php';
+require_once 'assets/nav.php';
+require_once 'assets/content.php';
+echo "<h1>Create Your Account</h1>";
+echo "<hr class='divider'>";
+if (isset($_SESSION['msg'])) {
+    echo "    <div class='feedback-success'>" . $_SESSION['msg'] . "</div>";
+    unset($_SESSION['msg']);
+} elseif ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($feedback)) {
+    echo "    <div class='feedback-error'>❌ **Registration Failed!** Please correct the following issues:<br><br>" . $feedback . "</div><br>";
+}
+echo "<form action='register.php' method='POST'>";
+echo "    <label for='first_name'>First Name:</label><br>";
+echo "    <input type='text' id='first_name' name='first_name' value='" . htmlspecialchars($_POST['first_name'] ?? '', ENT_QUOTES, 'UTF-8') . "' required><br><br>";
+echo "    <label for='last_name'>Last Name:</label><br>";
+echo "    <input type='text' id='last_name' name='last_name' value='" . htmlspecialchars($_POST['last_name'] ?? '', ENT_QUOTES, 'UTF-8') . "' required><br><br>";
+echo "    <label for='email'>Email Address:</label><br>";
+echo "    <input type='email' id='email' name='email' value='" . htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') . "' required><br><br>";
+echo "    <label for='date_of_birth'>Date of Birth:</label><br>";
+echo "    <input type='date' id='date_of_birth' name='date_of_birth' value='" . htmlspecialchars($_POST['date_of_birth'] ?? '', ENT_QUOTES, 'UTF-8') . "' required><br><br>";
+echo "    <label for='phone_number'>Phone Number:</label><br>";
+echo "    <input type='tel' id='phone_number' name='phone_number' value='" . htmlspecialchars($_POST['phone_number'] ?? '', ENT_QUOTES, 'UTF-8') . "' required><br><br>";
+echo "    <label for='address_line_1'>Address Line 1:</label><br>";
+echo "    <input type='text' id='address_line_1' name='address_line_1' value='" . htmlspecialchars($_POST['address_line_1'] ?? '', ENT_QUOTES, 'UTF-8') . "' required><br><br>";
+echo "    <label for='address_line_2'>Address Line 2 (Optional):</label><br>";
+echo "    <input type='text' id='address_line_2' name='address_line_2' value='" . htmlspecialchars($_POST['address_line_2'] ?? '', ENT_QUOTES, 'UTF-8') . "'><br><br>";
+echo "    <label for='postcode'>Postcode:</label><br>";
+echo "    <input type='text' id='postcode' name='postcode' value='" . htmlspecialchars($_POST['postcode'] ?? '', ENT_QUOTES, 'UTF-8') . "' required><br><br>";
+echo "    <label for='county'>County:</label><br>";
+echo "    <input type='text' id='county' name='county' value='" . htmlspecialchars($_POST['county'] ?? '', ENT_QUOTES, 'UTF-8') . "' required><br><br>";
+echo "    <hr class='divider'>";
+echo "    <label for='password'>Password:</label><br>";
+echo "    <input type='password' id='password' name='password' required><br><br>";
+echo "    <label for='confirmPassword'>Confirm Password:</label><br>";
+echo "    <input type='password' id='confirmPassword' name='confirmPassword' required><br><br>";
+echo "    <button type='submit'>Create Account</button>";
+echo "</form>";
+echo "<h2>Password Requirements</h2>";
+echo "<ul class='rules'>";
+echo "    <li>Must be <strong>greater than 8</strong> characters.</li>";
+echo "    <li>Must contain at least <strong>one upper case</strong> character.</li>";
+echo "    <li>Must contain at least <strong>one lower case</strong> character.</li>";
+echo "    <li>Must contain at least <strong>one number</strong>.</li>";
+echo "    <li>Must contain at least <strong>one special character</strong>.</li>";
+echo "    <li>The word <strong>“password”</strong> cannot be part of the password.</li>";
+echo "    <li>The <strong>first</strong> character cannot be a number or special character.</li>";
+echo "    <li>The <strong>last</strong> character cannot be a special character.</li>";
+echo "</ul><br>";
+echo "</div>";
+echo "</body>";
+echo "</html>";
+```
+===== END FILE: version_04\register.php =====
+
+===== BEGIN FILE: version_04\staff_register.php =====
+```php
+<?php
+session_start();
+require_once 'assets/dbconn.php';
+require_once 'assets/staff_common.php'; // Use the new staff common file
+
+// This page is for admins. We should add an admin login check here later,
+// but for now, we'll just check for a basic user login.
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['msg'] = "You must be logged in to manage staff.";
+    header("Location: login.php");
+    exit;
+}
+
+// Handle the form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // Simple validation to ensure fields are not empty
+    if (empty($_POST['role']) || empty($_POST['first_name']) || empty($_POST['last_name']) || empty($_POST['room'])) {
+        $_SESSION['msg'] = "ERROR: All fields are required.";
+    } else {
+        try {
+            // 1. Try to register the user
+            $new_staff_id = staffreg_user(dbconnect_insert());
+
+            if ($new_staff_id) {
+                // 2. If registration is successful, audit the action
+                $admin_user_id = $_SESSION['user_id'] ?? 0; // Get the admin who is logged in
+                $log_desc = "Admin (User ID: $admin_user_id) added new staff: " . $_POST['first_name'] . " " . $_POST['last_name'];
+
+                // We use a separate connection for the audit
+                staff_auditor(dbconnect_insert(), $new_staff_id, "STAFF_ADD", $log_desc);
+
+                $_SESSION['msg'] = "SUCCESS: New staff member has been registered.";
+            } else {
+                $_SESSION['msg'] = "ERROR: Could not register staff member.";
+            }
+
+        } catch (Exception $e) {
+            $_SESSION['msg'] = "ERROR: " . $e->getMessage();
+        }
+    }
+
+    // Redirect back to this same page to show the message and clear the form
+    header("Location: staff_register.php");
+    exit();
+}
+
+// Get any success/error messages
+$message = user_message();
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Staff - Primary Oaks</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<?php require_once 'assets/topbar.php'; ?>
+<?php require_once 'assets/nav.php'; ?>
+<?php require_once 'assets/content.php'; ?>
+
+<h1>Register New Staff Member</h1>
+<hr>
+
+<!-- Display any error/success messages here -->
+<?php echo $message; ?>
+
+<p>Use this form to add a new clinician to the booking system.</p>
+
+<!-- This form now matches your 'staff' table -->
+<form action="staff_register.php" method="POST">
+
+    <label for="role">Role (e.g., 'doc' or 'nur'):</label><br>
+    <input type="text" id="role" name="role" maxlength="3" required><br><br>
+
+    <label for="first_name">First Name:</label><br>
+    <input type="text" id="first_name" name="first_name" required><br><br>
+
+    <label for="last_name">Last Name:</label><br>
+    <input type="text" id="last_name" name="last_name" required><br><br>
+
+    <label for="room">Room Number:</label><br>
+    <input type="text" id="room" name="room" maxlength="4" required><br><br>
+
+    <button type="submit">Register Staff Member</button>
+</form>
+
+</div> <!-- Closes the content div from content.php -->
+
+</body>
+</html>
+```
+===== END FILE: version_04\staff_register.php =====
+
