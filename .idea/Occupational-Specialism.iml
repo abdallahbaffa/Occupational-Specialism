@@ -5,6 +5,5 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="occspec2526-main" />
-    <orderEntry type="module" module-name="occspec2526" />
   </component>
 </module>
