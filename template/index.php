@@ -1,39 +1,49 @@
-<?php
+<?php // This open the php code section
 
-session_start();
-
+if (!isset($_GET['message'])) {
+    session_start();
+    $message = false;
+} else {
+    // Decode the message for display
+    $message = htmlspecialchars(urldecode($_GET['message']));
+}
 require_once "assets/common.php";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+echo "<!DOCTYPE html>";  # essential html line to dictate the page type
 
-    $_SESSION["msg"] = $_POST["message"];
-}
+echo "<html>";  # opens the html content of the page
 
-echo "<!DOCTYPE html>";
-// Start of the HTML document
-echo "<html>";
+echo "<head>";  # opens the head section
 
-echo "<head>";
+echo "<title>I am a Template Title</title>";  # sets the title of the page (web browser tab)
+echo "<link rel='stylesheet' type='text/css' href='css/styles.css' />";  # links to the external style sheet
 
-echo "<title>Template</title>";
-// Links to the external CSS file, 'styles.css', which handles the website's design
-echo "<link rel='stylesheet' href='css/styles.css'>";
+echo "</head>";  # closes the head section of the page
 
-echo "</head>";
-
-echo "<body>";
+echo "<body>";  # opens the body for the main content of the page.
 
 echo "<div class='container'>";
 
-require_once "assets/nav.php";
+require_once "assets/topbar.php";  // brings in the top bar, so unified branding is applied throughout
 
-require_once "assets/topbar.php";
+require_once "assets/nav.php";  // brings in the nav bar, so one place to change, reflected throughout
 
-echo "<div id='content'>";
+echo "<div class='content'>";
+echo "<br>";
 
-# content goes here
+echo "<h2> I am a Title Heading</h2>";  # sets a h2 heading as a welcome
 
-echo "<h2>Template</h2>"; # Header to show on the website.
+echo "<p class='content'> Prevention is better than cure. </p>";
+
+echo "<p class='content'> You have to be registered to login and book. </p>";
+
+echo "<br>";
+
+if (!$message){  # gets the message from the url if applicable or echos out user message
+    echo usermessage();
+} else {
+    echo $message;
+}
 
 echo "</div>";
 

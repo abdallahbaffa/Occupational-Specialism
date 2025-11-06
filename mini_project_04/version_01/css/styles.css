@@ -1,0 +1,27 @@
+nav ul {
+    list-style-type: none; /* removes the bullet points */
+    margin: 0; /* removes any margin */
+    padding: 0; /* removes any padding */
+    display: flex; /* Makes the list items a flex container */
+    justify-content: flex-start; /* Aligns items to the start of the container */
+}
+
+.linkbox { /* this will style the class of items called "linkbox" which is part of my menu bar*/
+    background-color: #dba20f;
+    margin: 0 5px; /* Adds some space between the links */
+}
+
+.linkbox a { /* Styles the links inside the linkbox */
+    display: block; /* Makes the whole link area clickable */
+    color: #000; /* Link text color */
+    text-decoration: none; /* Removes underline */
+    padding: 10px 15px; /* Adds padding inside the link box */
+}
+
+.linkbox a:hover { /* Changes link color on hover */
+    color: #fff;
+}
+
+.linkbox:hover{ /* this will style linkbox when a cursor is over it*/
+    background-color: #a34e08;
+}
