@@ -1,0 +1,271 @@
+/* === Global === */
+body {
+    background-color: #2e4a3d; /* Dark Forest Green - main background color */
+    margin: 0;
+    font-family: sans-serif; /* Use sans-serif font */
+    color: #ffffff; /* Default text color - white for readability on dark background */
+}
+
+/* - Top Header Bar - */
+.topbar { /* Assuming a class or element for the top bar exists or can be added */
+    width: 100%;
+    background-color: #243a30; /* Slightly lighter dark green for header */
+    padding: 15px 0;
+    text-align: center;
+}
+.topbar h1 {
+    color: #ffffff; /* White text for header title */
+    margin: 0;
+    font-size: 2em; /* Large font size for header */
+}
+
+/* - Navigation Bar - */
+nav ul {
+    list-style-type: none; /* Remove bullet points from navigation */
+    margin: 0;
+    padding: 0;
+    display: flex; /* Make navigation items display horizontally */
+    justify-content: flex-start; /* Align items to the left */
+    background-color: #059669; /* Calming green background for nav bar */
+    width: 100%;
+}
+nav li {
+    padding: 10px 20px; /* Space around each navigation item */
+}
+nav li a {
+    color: #ffffff; /* White text on green background - good contrast */
+    text-decoration: none; /* Remove underline from links */
+    font-size: 1.1em; /* Slightly larger text for readability */
+    display: inline-block; /* Make links behave like block elements */
+}
+nav li a:hover,
+nav li a:focus,
+nav li a:focus-visible {
+    background-color: #047857; /* Darker green on hover/focus for visual feedback */
+    text-decoration: underline; /* Add underline on hover for accessibility */
+    outline: 2px solid #ffffff; /* White outline for focus visibility */
+    outline-offset: 2px; /* Space between outline and element */
+}
+nav li a:active {
+    background-color: #065f46; /* Even darker green when link is clicked */
+}
+
+/* - Content Area - */
+.content {
+    padding: 20px; /* Space around content */
+    width: calc(100% - 40px); /* Adjust width based on padding */
+    max-width: 1200px; /* Optional: limit max width for readability */
+    margin: 0 auto; /* Center content if a max-width is set */
+}
+
+/* - Portal Links (Example class for links in content area) - */
+.portal-links {
+    margin: 10px 0; /* Space around portal links container */
+}
+.portal-links a {
+    display: inline-block; /* Make links block-like for padding */
+    padding: 10px 15px; /* Padding inside portal links */
+    margin: 5px 10px 5px 0; /* Space around individual links */
+    background-color: #047857; /* Dark green background */
+    color: #d1fae5; /* Light green/teal text */
+    text-decoration: none; /* Remove default underline */
+    border-radius: 4px; /* Rounded corners */
+    font-weight: bold; /* Bold text */
+    transition: background-color 0.3s ease; /* Smooth color transition */
+}
+.portal-links a:hover {
+    background-color: #036d4f; /* Slightly darker green on hover */
+    color: #ffffff; /* White text on hover */
+    text-decoration: underline; /* Underline on hover */
+}
+.portal-links a:focus,
+.portal-links a:focus-visible {
+    outline: 2px solid #d1fae5; /* Light green outline for focus */
+    outline-offset: 2px; /* Space between outline and element */
+    text-decoration: underline; /* Underline on focus for accessibility */
+}
+.portal-links a:active {
+    color: #ffffff; /* White text when link is active */
+    background-color: #036d4f; /* Even darker green when clicked */
+}
+
+/* - Feedback Message Styles - */
+.feedback-success,
+#usermessage { /* Assuming #usermessage is used for success */
+    color: #10b981; /* Green text for success messages */
+    font-weight: bold;
+    padding: 10px 15px; /* Padding inside message box */
+    border: 1px solid #10b981; /* Green border */
+    background-color: #0c4a35; /* Dark green background */
+    margin-bottom: 10px; /* Space below message */
+    border-radius: 4px; /* Rounded corners */
+}
+.feedback-error,
+#usererror { /* Assuming #usererror is used for errors */
+    color: #ef4444; /* Red text for error messages */
+    padding: 10px 15px; /* Padding inside message box */
+    border: 1px solid #ef4444; /* Red border */
+    background-color: #450a0a; /* Dark red background */
+    margin-bottom: 10px; /* Space below message */
+    border-radius: 4px; /* Rounded corners */
+}
+
+/* - Form Elements - */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+    width: 100%; /* Full width for inputs */
+    padding: 10px 15px; /* Padding inside inputs */
+    margin: 8px 0; /* Space above/below inputs */
+    display: inline-block; /* Align inputs properly */
+    border: 1px solid #4b5563; /* Gray border */
+    border-radius: 4px; /* Rounded corners */
+    box-sizing: border-box; /* Include padding/border in width */
+    background-color: #1e293b; /* Dark background for inputs */
+    color: #ffffff; /* White text in inputs */
+    font-size: 16px; /* Readable font size */
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+select:focus,
+textarea:focus {
+    outline: none; /* Remove default outline */
+    border: 1px solid #d1fae5; /* Highlight border on focus */
+    box-shadow: 0 0 5px rgba(209, 250, 229, 0.5); /* Optional: subtle glow */
+}
+
+/* - Buttons - */
+input[type="submit"],
+button {
+    background-color: #059669; /* Green background for submit buttons */
+    color: white; /* White text */
+    padding: 10px 15px; /* Padding inside buttons */
+    margin: 5px 0; /* Space around buttons */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 16px; /* Readable font size */
+    font-weight: bold; /* Bold text */
+    transition: background-color 0.3s ease; /* Smooth color transition */
+}
+input[type="submit"]:hover,
+button:hover {
+    background-color: #047857; /* Darker green on hover */
+}
+input[type="submit"]:active,
+button:active {
+    background-color: #065f46; /* Even darker green when clicked */
+}
+
+/* - Tables - */
+#bookings, /* Assuming #bookings is the main table ID */
+.appointment-table { /* Or using a class like .appointment-table */
+    width: 100%; /* Full width table */
+    border-collapse: collapse; /* Merge table borders */
+    margin: 20px 0; /* Space around table */
+    background-color: #1e3a2d; /* Dark background for table */
+    border-radius: 8px; /* Rounded corners */
+    overflow: hidden; /* Contain rounded corners */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
+}
+#bookings th,
+#bookings td,
+.appointment-table th,
+.appointment-table td {
+    padding: 12px 15px; /* Padding inside cells */
+    text-align: left; /* Align text to the left */
+    border-bottom: 1px solid #4b5563; /* Separator line */
+}
+#bookings thead,
+.appointment-table thead {
+    background-color: #047857; /* Dark green header background */
+}
+#bookings thead th,
+.appointment-table thead th {
+    font-size: 0.9em; /* Slightly smaller font for headers */
+    font-weight: bold; /* Bold header text */
+}
+#bookings tr:nth-child(even),
+.appointment-table tr:nth-child(even) {
+    background-color: #243a30; /* Slightly lighter green for even rows */
+}
+#bookings tr:hover,
+.appointment-table tr:hover {
+    background-color: #059669; /* Green highlight on row hover */
+    transition: background-color 0.2s ease; /* Smooth color transition */
+}
+
+/* - Action Buttons in Tables - */
+.action-btn {
+    padding: 5px 10px; /* Padding inside action buttons */
+    margin: 2px; /* Space around buttons */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    color: white; /* White text */
+    font-weight: bold; /* Bold text */
+    transition: background-color 0.3s ease; /* Smooth color transition */
+}
+.btn-delete {
+    background-color: #dc2626; /* Red background for delete buttons */
+}
+.btn-delete:hover {
+    background-color: #b91c1c; /* Darker red on hover */
+}
+.btn-change {
+    background-color: #059669; /* Green background for change buttons */
+}
+.btn-change:hover {
+    background-color: #047857; /* Darker green on hover */
+}
+
+/* - Password Requirements List - */
+.rules {
+    margin: 20px 0; /* Space around rules list */
+    padding-left: 20px; /* Indentation for list */
+}
+.rules li {
+    color: #d1fae5; /* Light green/teal text */
+}
+
+/* - General Focus Styles - */
+:focus {
+    scroll-margin: 100px; /* Space for fixed headers when focusing elements */
+}
+:focus-visible {
+    outline: 2px solid #ffffff; /* White outline for focused elements */
+    outline-offset: 2px; /* Space between outline and element */
+}
+
+/* - Responsive Design - */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column; /* Stack navigation items vertically on small screens */
+    }
+    nav li {
+        padding: 8px 15px; /* Smaller padding on mobile */
+    }
+    .content {
+        width: calc(100% - 30px); /* Adjust width based on new padding */
+        padding: 15px; /* Smaller padding on mobile */
+    }
+
+    /* Adjust table for mobile if needed, e.g., make it scrollable */
+    #bookings,
+    .appointment-table {
+        font-size: 0.9em; /* Slightly smaller text */
+    }
+    #bookings th,
+    #bookings td,
+    .appointment-table th,
+    .appointment-table td {
+        padding: 8px 10px; /* Smaller padding */
+    }
+}
